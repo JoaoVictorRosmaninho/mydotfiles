@@ -1,0 +1,117 @@
+@import "./colors.css";
+
+@define-color textcolor #121212;
+
+* {
+    border: none;
+    border-radius: 0;
+    padding: 0px;
+    margin:  0px;
+    font-family: "SF Pro Display", "JetBrainsMono Nerd Font", Arial, sans-serif;
+    font-size: 1.1rem;
+    min-height: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @on_surface;
+}
+
+tooltip {
+    background: @background;
+    border: @on_secondary_container;
+}
+
+tooltip label {
+    color: @on_surface;
+}
+
+#workspaces {
+  background-color: alpha(@on_primary, 0.2);
+  padding: 5px 3px;
+  margin:  0px 0px 0px 12px;
+  border-radius: 18px;
+  color: @on_secondary;
+}
+
+#workspaces button {
+    padding: 0px 6px;
+    margin:  0px 3px;
+    border-radius: 50px;
+    color: transparent;
+    background-color: alpha(@on_primary, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+#workspaces button.active {
+    background-color: alpha(@primary, 0.9);
+    color:            @textcolor;
+    min-width:        50px;
+    /* Active workspace color */
+    font-weight:      bold;
+    transition: all 0.3s ease-in-out;
+}
+
+#workspaces button:hover {
+    background-color: alpha(@primary, 0.55);
+    color:            @textcolor;
+    border-radius:    16px;
+    min-width:        50px;
+    background-size:  400% 400%;
+    /* Hover color */
+}
+
+#workspaces button.focused {
+    background-color: alpha(@primary, 0.55);
+}
+
+#workspaces button.urgent {
+    background-color: #eb4d4b;
+    color: @textcolor;
+    border-radius:    16px;
+    min-width:        50px;
+    transition: all 0.3s ease-in-out;
+    background-size:  400% 400%;
+}
+
+#pulseaudio,
+#memory,
+#power,
+#custom-power,
+#battery,
+#tray,
+#custom-notification,
+#custom-screenshot,
+#custom-mydate {
+    background-color: @primary;
+    padding: 0px 10px;
+    margin: 0px 2px;
+    border-radius: 8px;
+    color: @textcolor;
+}
+
+#custom-power {
+    padding-left: 1rem;
+}
+
+#custom-screenshot {
+    padding-left: 1rem;
+    padding-right: 1.20em;
+}
+
+#custom-notification {
+    padding-left: 1em;
+    padding-right: 1.20em;
+}
+
+#pulseaudio {
+    color: @textcolor;
+    padding-right: 1.20em;
+}
+
+@keyframes blink {
+    to {
+        background-color: #ffffff;
+        color: black;
+    }
+}
