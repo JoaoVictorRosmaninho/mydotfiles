@@ -107,6 +107,7 @@
         "exec": "date '+%Y/%m/%d %k:%M'", // O comando exato que você quer rodar
         "interval": 60, // Roda a cada 60 segundos
         "tooltip": false, // Desativa tooltip (ou configure script para JSON)
+        "on-click": "gnome-calendar",
         "class": "mydate"
     },
     "custom/power": {
