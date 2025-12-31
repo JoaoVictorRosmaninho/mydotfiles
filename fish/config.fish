@@ -11,4 +11,4 @@ starship init fish | source
 init_ssh_agent
 
 #Zoxide
-zoxide init fish | source
+zoxide init fish --cmd cd | source
