@@ -116,10 +116,10 @@
         "menu": "on-click",
         "menu-file": "$HOME/.config/waybar/resources/power_menu.xml", // Menu file in resources folder
         "menu-actions": {
-            "shutdown": "shutdown -h now",
-            "reboot": "reboot",
-            "suspend": "systemctl suspend",
-            "hibernate": "systemctl hibernate"
+            "shutdown": "loginctl poweroff",
+            "reboot": "loginctl reboot",
+            "suspend": "loginctl suspend",
+            "hibernate": "loginctl hibernate"
         },
         "persistent-workspaces": {
             "*": 10
