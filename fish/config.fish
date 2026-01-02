@@ -3,6 +3,7 @@ if status is-interactive
 end
 
 set -g fish_user_paths $fish_user_paths ~/.local/bin
+set -g fish_user_paths $fish_user_paths ~/.local/bin/code
 
 # starship init
 starship init fish | source
