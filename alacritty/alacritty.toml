@@ -4,6 +4,16 @@ key = "Return"
 mods = "Control|Shift"
 action = "SpawnNewInstance"
 
+[[keyboard.bindings]]
+key = "K"
+mods = "Control|Shift"
+chars = "\u000c" # Sends 'clear' to the shell
+
+[[keyboard.bindings]]
+key = "K"
+mods = "Control|Shift"
+action = "ClearHistory" # Wipes the scrollback buffer
+
 [font]
 # Point size
 size = 14.0
