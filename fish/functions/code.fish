@@ -1,3 +1,3 @@
 function code
-    ~/.local/bin/code/code $args 2&>/dev/null & disown
+    ~/.local/bin/code/code $argv 2&>/dev/null & disown
 end
