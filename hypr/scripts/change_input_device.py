@@ -4,7 +4,7 @@ import subprocess
 import json
 
 audio_devices_list_command   = 'pactl --format=json list sources'.split()
-wofi_selector_menu_command   = 'wofi --dmenu'.split()
+wofi_selector_menu_command   = 'wofi -p InputSelector --dmenu'.split()
 audio_devices_change_command = 'pactl set-default-source'
 
 
@@ -38,6 +38,9 @@ def select_output_device():
 def main():
 
     #if wofi and pactl are installed then
-    select_output_device()
+    if subprocess.run(['which', 'wofi'], capture_output=True).returncode == 0 and subprocess.run(['which', 'pactl'], capture_output=True).returncode == 0:
+        select_output_device()
+    else:
+        print("wofi or pactl is not installed")
 
 main()
