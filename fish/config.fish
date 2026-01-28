@@ -5,6 +5,8 @@ end
 set -g fish_user_paths $fish_user_paths ~/.local/bin
 set -g fish_user_paths $fish_user_paths ~/.local/bin/code
 
+# go path
+set -g fish_user_paths $fish_user_paths ~/go/bin
 # starship init
 starship init fish | source
 
