@@ -3,8 +3,8 @@
   "spacing": 4,
   "height": 32,
   "modules-left": [
-    //"hyprland/workspaces"
-    "ext/workspaces",
+   // "hyprland/workspaces"
+   "ext/workspaces",
     "dwl/window",
   ],
   "modules-center": ["custom/mydate"],
