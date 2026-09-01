@@ -27,3 +27,7 @@ init_ssh_agent
 
 #Zoxide
 zoxide init fish --cmd cd | source
+
+# Qwen Code PATH block begin
+set -gx PATH '/home/joao/.local/bin' $PATH
+# Qwen Code PATH block end

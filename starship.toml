@@ -24,6 +24,7 @@ $python\
 $docker_context\
 $conda\
 $pixi\
+$aws\
 [](fg:color_bg3 bg:color_bg1)\
 $time\
 [ ](fg:color_bg1)\
@@ -148,6 +149,12 @@ format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
 symbol = ""
 style = "bg:color_blue"
 format = '[[ $symbol( $version) ](fg:color_fg0 bg:color_blue)]($style)'
+
+[aws]
+disabled = false
+symbol = " "
+style = "bg:color_bg3"
+format = '[[ $symbol$profile( \($region\)) ](fg:#fabd2f bg:color_bg3)]($style)'
 
 [docker_context]
 symbol = ""
