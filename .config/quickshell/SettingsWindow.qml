@@ -24,7 +24,12 @@ PanelWindow {
     function nextPage() { selectedIndex = (selectedIndex + 1) % navItems.length }
     function prevPage() { selectedIndex = (selectedIndex - 1 + navItems.length) % navItems.length }
 
-    onShowingChanged: if (!showing) dragging = false
+    // Re-apply the snap on every open: after a hot reload the layer surface can
+    // report a transient size, and applySnap() assigns (not binds) the card size.
+    onShowingChanged: {
+        if (!showing) dragging = false
+        else if (width > 0 && height > 0) applySnap(snapPosition)
+    }
 
     property real cardMargin: 40
     property real dragMargin: 8
@@ -242,6 +247,7 @@ PanelWindow {
         width: root.cardWidth
         height: root.cardHeight
         open: root.showing
+        followMouse: false
 
         Behavior on x {
             enabled: !root.dragging
@@ -278,7 +284,7 @@ PanelWindow {
         }
         Rectangle {
             anchors.fill: parent
-            color: Theme.bg
+            color: Theme.alpha(Theme._bgBase, 0.98)
             radius: Theme.radius
             border.color: Theme.accent
             border.width: 1
@@ -438,7 +444,7 @@ PanelWindow {
                     Text {
                         text: "◀"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 6
+                        font.pixelSize: 7
                         color: Theme.textDim
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea { anchors.fill: parent; anchors.margins: -4; onClicked: root.snapLeft() }
@@ -446,7 +452,7 @@ PanelWindow {
                     Text {
                         text: "▲"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 8
+                        font.pixelSize: 10
                         color: Theme.textDim
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea { anchors.fill: parent; anchors.margins: -4; onClicked: root.snapTop() }
@@ -454,7 +460,7 @@ PanelWindow {
                     Text {
                         text: "●"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 8
+                        font.pixelSize: 10
                         color: Theme.textDim
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea { anchors.fill: parent; anchors.margins: -4; onClicked: root.snapCenter() }
@@ -462,7 +468,7 @@ PanelWindow {
                     Text {
                         text: "▼"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 8
+                        font.pixelSize: 10
                         color: Theme.textDim
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea { anchors.fill: parent; anchors.margins: -4; onClicked: root.snapBottom() }
@@ -470,7 +476,7 @@ PanelWindow {
                     Text {
                         text: "▶"
                         font.family: Theme.fontFamily
-                        font.pixelSize: 6
+                        font.pixelSize: 7
                         color: Theme.textDim
                         anchors.verticalCenter: parent.verticalCenter
                         MouseArea { anchors.fill: parent; anchors.margins: -4; onClicked: root.snapRight() }
@@ -485,7 +491,7 @@ PanelWindow {
 
                 Column {
                     id: sidebar
-                    width: 130
+                    width: 165
                     height: parent.height
                     spacing: 12
 
@@ -493,7 +499,7 @@ PanelWindow {
                         text: " SETTINGS"
                         color: Theme.text
                         font.family: Theme.fontFamily
-                        font.pixelSize: 19
+                        font.pixelSize: 23
                         font.bold: true
                         font.letterSpacing: 4
                     }
@@ -567,7 +573,7 @@ PanelWindow {
                                             horizontalAlignment: Text.AlignHCenter
                                             text: modelData.icon
                                             font.family: Theme.iconFont
-                                            font.pixelSize: 14
+                                            font.pixelSize: 17
                                             color: root.selectedIndex === index
                                                 ? Theme.text
                                                 : Theme.textDim
@@ -578,7 +584,7 @@ PanelWindow {
                                             verticalAlignment: Text.AlignVCenter
                                             text: modelData.name
                                             font.family: Theme.fontFamily
-                                            font.pixelSize: 13
+                                            font.pixelSize: 16
                                             color: root.selectedIndex === index
                                                 ? Theme.text
                                                 : Theme.textDim

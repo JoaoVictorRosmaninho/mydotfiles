@@ -15,7 +15,7 @@ Item {
 
     function editConfig(path) {
         Quickshell.execDetached([
-            "xed",
+            "gedit",
             path.replace(/^~/, Quickshell.env("HOME"))
         ])
     }
@@ -38,7 +38,7 @@ Item {
             text: label
             color: Theme.textDim
             font.family: Theme.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: 16
             font.bold: true
             font.letterSpacing: 2
         }
@@ -53,7 +53,7 @@ Item {
                 text: "\uf120"
                 color: Theme.textDim
                 font.family: Theme.iconFont
-                font.pixelSize: 13
+                font.pixelSize: 16
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -61,7 +61,7 @@ Item {
                 text: "EDIT " + path.split("/").pop().toUpperCase()
                 color: Theme.textDim
                 font.family: Theme.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: 14
                 font.bold: true
                 font.letterSpacing: 1
                 anchors.verticalCenter: parent.verticalCenter
@@ -124,7 +124,7 @@ Item {
                 text: "CONFIGS"
                 color: Theme.text
                 font.family: Theme.fontFamily
-                font.pixelSize: 19
+                font.pixelSize: 23
                 font.letterSpacing: 3
             }
 
@@ -135,10 +135,10 @@ Item {
             }
 
             Text {
-                text: "HYPRLAND"
+                text: "MANGO"
                 color: Theme.text
                 font.family: Theme.fontFamily
-                font.pixelSize: 16
+                font.pixelSize: 19
                 font.letterSpacing: 3
             }
 
@@ -152,35 +152,31 @@ Item {
                 width: parent.width
                 spacing: page.sectionSpacing
                 ConfigButton {
-                    label: "PROGRAMS - AUTOSTART - INPUT"
-                    path: "~/.config/hypr/hyprland.lua"
+                    label: "LOOK - INPUT - LAYOUTS"
+                    path: "~/.config/mango/config.conf"
                 }
                 ConfigButton {
-                    label: "MONITORS - WORKSPACES"
-                    path: "~/.config/hypr/monitors.lua"
-                }
-                ConfigButton {
-                    label: "LOOK AND FEEL"
-                    path: "~/.config/hypr/look.lua"
+                    label: "AUTOSTART"
+                    path: "~/.config/mango/autostart.conf"
                 }
                 ConfigButton {
                     label: "KEYBINDS"
-                    path: "~/.config/hypr/keybinds.lua"
+                    path: "~/.config/mango/binds.conf"
                 }
                 ConfigButton {
                     label: "RULES"
-                    path: "~/.config/hypr/rules.lua"
+                    path: "~/.config/mango/rules.conf"
                 }
                 ConfigButton {
-                    label: "LOCK SCREEN"
-                    path: "~/.config/hypr/hyprlock.conf"
+                    label: "LOCAL OVERRIDES (MONITORS...)"
+                    path: "~/.config/mango/local.conf"
                 }
             }
             Text {
                 text: "ROFI"
                 color: Theme.text
                 font.family: Theme.fontFamily
-                font.pixelSize: 16
+                font.pixelSize: 19
                 font.letterSpacing: 3
             }
             Rectangle {

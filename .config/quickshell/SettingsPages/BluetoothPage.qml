@@ -150,7 +150,7 @@ Item {
 
         Text {
             text: "BLUETOOTH"; color: Theme.text
-            font.family: Theme.fontFamily; font.pixelSize: 19; font.letterSpacing: 3
+            font.family: Theme.fontFamily; font.pixelSize: 23; font.letterSpacing: 3
         }
 
         Rectangle { width: parent.width; height: 1; color: Theme.border }
@@ -171,7 +171,7 @@ Item {
                 text: page.powered ? "BLUETOOTH ON" : "BLUETOOTH OFF"
                 color: page.powered ? Theme.accent : Theme.textFaint
                 font.family: Theme.fontFamily
-                font.pixelSize: 10
+                font.pixelSize: 12
                 font.bold: true
                 font.letterSpacing: 1
             }
@@ -189,7 +189,7 @@ Item {
             text: page.statusText
             color: Theme.accent
             font.family: Theme.fontFamily
-            font.pixelSize: 10
+            font.pixelSize: 12
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -217,7 +217,7 @@ Item {
                         text: "NO BLUETOOTH ADAPTER"
                         color: Theme.textDim
                         font.family: Theme.fontFamily
-                        font.pixelSize: 11
+                        font.pixelSize: 13
                         font.letterSpacing: 1
                     }
                 }
@@ -236,7 +236,7 @@ Item {
                             text: "\uf294"
                             color: Theme.textDim
                             font.family: Theme.iconFont
-                            font.pixelSize: 24
+                            font.pixelSize: 29
                         }
 
                         Text {
@@ -244,7 +244,7 @@ Item {
                             text: "BLUETOOTH IS OFF"
                             color: Theme.textDim
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: 13
                             font.letterSpacing: 1
                         }
                     }
@@ -264,7 +264,7 @@ Item {
                             text: "\uf1eb"
                             color: Theme.textDim
                             font.family: Theme.iconFont
-                            font.pixelSize: 22
+                            font.pixelSize: 26
                         }
 
                         Text {
@@ -272,7 +272,7 @@ Item {
                             text: "SCANNING FOR DEVICES..."
                             color: Theme.textDim
                             font.family: Theme.fontFamily
-                            font.pixelSize: 11
+                            font.pixelSize: 13
                             font.letterSpacing: 1
                         }
 
@@ -281,7 +281,7 @@ Item {
                             text: "Keep this open while devices appear."
                             color: Theme.textFaint
                             font.family: Theme.fontFamily
-                            font.pixelSize: 9
+                            font.pixelSize: 11
                         }
                     }
                 }
@@ -339,7 +339,7 @@ Item {
                                     : Theme.accent
 
                                 font.family: Theme.fontFamily
-                                font.pixelSize: 10
+                                font.pixelSize: 12
                                 verticalAlignment: Text.AlignVCenter
 
                                 MouseArea {
@@ -362,7 +362,7 @@ Item {
                                     text: "\uf293"
                                     color: Theme.textDim
                                     font.family: Theme.iconFont
-                                    font.pixelSize: 16
+                                    font.pixelSize: 19
                                 }
 
                                 MouseArea {
@@ -390,7 +390,7 @@ Item {
                                         text: "Unpair"
                                         color: "white"
                                         font.family: Theme.fontFamily
-                                        font.pixelSize: 10
+                                        font.pixelSize: 12
                                     }
                                 }
                             }
@@ -417,7 +417,7 @@ Item {
                                     ? Theme.accent
                                     : Theme.textDim
                                 font.family: Theme.iconFont
-                                font.pixelSize: 15
+                                font.pixelSize: 18
                                 verticalAlignment: Text.AlignVCenter
                             }
 
@@ -435,7 +435,7 @@ Item {
                                     elide: Text.ElideRight
                                     color: Theme.text
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: 12
+                                    font.pixelSize: 14
                                 }
 
                                 Text {
@@ -464,7 +464,7 @@ Item {
                                         : Theme.textFaint
 
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: 9
+                                    font.pixelSize: 11
                                     elide: Text.ElideRight
                                 }
                             }

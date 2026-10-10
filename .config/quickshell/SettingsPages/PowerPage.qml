@@ -129,7 +129,7 @@ Item {
 
             Text {
                 text: "POWER"; color: Theme.text
-                font.family: Theme.fontFamily; font.pixelSize: 19; font.letterSpacing: 3
+                font.family: Theme.fontFamily; font.pixelSize: 23; font.letterSpacing: 3
             }
 
             Rectangle { width: parent.width; height: 1; color: Theme.border }
@@ -140,7 +140,7 @@ Item {
 
                 Text {
                     text: "POWER PROFILE"; color: Theme.text
-                    font.family: Theme.fontFamily; font.pixelSize: 15; font.bold: true; font.letterSpacing: 2
+                    font.family: Theme.fontFamily; font.pixelSize: 18; font.bold: true; font.letterSpacing: 2
                 }
 
                 Row {
@@ -179,21 +179,21 @@ Item {
                                     Text {
                                         anchors.centerIn: parent; text: card.modelData.icon
                                         color: card.selected ? Theme.accent : "#A0A0A0"
-                                        font.family: Theme.iconFont; font.pixelSize: 12
+                                        font.family: Theme.iconFont; font.pixelSize: 14
                                     }
                                 }
 
                                 Text {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: card.modelData.label; color: Theme.text
-                                    font.family: Theme.fontFamily; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1
+                                    font.family: Theme.fontFamily; font.pixelSize: 14; font.bold: true; font.letterSpacing: 1
                                 }
 
                                 Text {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: card.available ? card.modelData.desc : "Unavailable"
                                     color: Theme.textDim
-                                    font.family: Theme.fontFamily; font.pixelSize: 10
+                                    font.family: Theme.fontFamily; font.pixelSize: 12
                                 }
                             }
 
@@ -225,19 +225,19 @@ Item {
 
                         Text {
                             text: "BATTERY"; color: Theme.text
-                            font.family: Theme.fontFamily; font.pixelSize: 14; font.bold: true
+                            font.family: Theme.fontFamily; font.pixelSize: 17; font.bold: true
                         }
 
                         Text {
                             text: page.batteryStatus.toUpperCase()
                             color: Theme.textDim
-                            font.family: Theme.fontFamily; font.pixelSize: 12
+                            font.family: Theme.fontFamily; font.pixelSize: 14
                         }
 
                         Text {
                             visible: page.batteryStatus === "Charging"
                             text: "CHARGING"; color: Theme.accent2
-                            font.family: Theme.fontFamily; font.pixelSize: 10
+                            font.family: Theme.fontFamily; font.pixelSize: 12
                         }
                     }
 
@@ -249,13 +249,13 @@ Item {
                             anchors.left: parent.left
                             text: "LEVEL"
                             color: Theme.textDim
-                            font.family: Theme.fontFamily; font.pixelSize: 11
+                            font.family: Theme.fontFamily; font.pixelSize: 13
                         }
                         Text {
                             anchors.right: parent.right
                             text: page.batteryPercent + "%"
                             color: Theme.text
-                            font.family: Theme.fontFamily; font.pixelSize: 11
+                            font.family: Theme.fontFamily; font.pixelSize: 13
                         }
                     }
 

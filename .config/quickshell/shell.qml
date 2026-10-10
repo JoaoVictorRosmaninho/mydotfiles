@@ -9,4 +9,5 @@ ShellRoot {
     Bar {}
     Todo {}
     Wheel {}
+    Lock {}
 }

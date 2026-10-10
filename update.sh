@@ -2,7 +2,7 @@
 
 set -uo pipefail
 
-# 43PR/dotfiles updater (symlink model)
+# 43PR/dotfiles updater (symlink model) — Void Linux + MangoWC port
 #
 # Dotfiles are symlinked from the repo into ~/.config, so editing either
 # path edits the same file — there is nothing to sync for existing files.
@@ -24,7 +24,8 @@ PACKAGE_FILE="$REPO_DIR/packages.txt"
 
 GENERATED_FILES=(
     "kitty/matugen.conf"
-    "hypr/hyprlock-colors.conf"
+    "mango/colors.conf"
+    "alacritty/colors.toml"
     "gtk-3.0/colors.css"
     "gtk-4.0/colors.css"
     "gtk-3.0/settings.ini"
@@ -82,73 +83,39 @@ UNKNOWN_PACKAGES=()
 
 if [[ "$SKIP_PACKAGES" -eq 1 ]]; then
     info "Skipping package installation (--skip-packages)."
-elif ! command -v pacman >/dev/null 2>&1; then
-    error "pacman was not found. This updater requires an Arch-based system."
+elif ! command -v xbps-install >/dev/null 2>&1; then
+    error "xbps-install was not found. This updater requires Void Linux."
     exit 1
-elif [[ ! -f "$PACKAGE_FILE" ]]; then
-    warning "packages.txt not found; skipping package installation."
-else
-    mapfile -t PACKAGES < <(grep -vE '^[[:space:]]*(#|$)' "$PACKAGE_FILE")
-
+elif [[ -f "$PACKAGE_FILE" ]]; then
+    mapfile -t PACKAGES < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$PACKAGE_FILE" | grep -v '^[[:space:]]*$')
     MISSING=()
     for pkg in "${PACKAGES[@]}"; do
-        pacman -Qi "$pkg" >/dev/null 2>&1 || MISSING+=("$pkg")
+        xbps-query "$pkg" >/dev/null 2>&1 || MISSING+=("$pkg")
     done
 
     if [[ "${#MISSING[@]}" -eq 0 ]]; then
-        info "Packages: everything in packages.txt is already installed."
-    elif [[ "$DRY_RUN" -eq 1 ]]; then
-        info "Would install (${#MISSING[@]}): ${MISSING[*]}"
-    elif ! command -v sudo >/dev/null 2>&1; then
-        warning "sudo not found; skipping package installation."
+        success "All packages from packages.txt are installed."
     else
-        AUR_HELPER=""
-        if command -v paru >/dev/null 2>&1; then
-            AUR_HELPER="paru"
-        elif command -v yay >/dev/null 2>&1; then
-            AUR_HELPER="yay"
-        fi
-
-        OFFICIAL_PACKAGES=()
-        AUR_PACKAGES=()
-
-        info "Resolving new packages..."
+        FOUND=()
         for pkg in "${MISSING[@]}"; do
-            if pacman -Si "$pkg" >/dev/null 2>&1; then
-                OFFICIAL_PACKAGES+=("$pkg")
-            elif [[ -n "$AUR_HELPER" ]] && "$AUR_HELPER" -Si "$pkg" >/dev/null 2>&1; then
-                AUR_PACKAGES+=("$pkg")
-            else
-                UNKNOWN_PACKAGES+=("$pkg")
-            fi
+            if xbps-query -R "$pkg" >/dev/null 2>&1; then FOUND+=("$pkg"); else UNKNOWN_PACKAGES+=("$pkg"); fi
         done
-
-        if [[ "${#OFFICIAL_PACKAGES[@]}" -gt 0 ]]; then
-            info "Installing new official-repo packages: ${OFFICIAL_PACKAGES[*]}"
-            if sudo pacman -S --needed --noconfirm "${OFFICIAL_PACKAGES[@]}"; then
-                success "Official-repo packages installed."
+        if [[ "${#FOUND[@]}" -gt 0 ]]; then
+            if [[ "$DRY_RUN" -eq 1 ]]; then
+                info "Would install: ${FOUND[*]}"
             else
-                warning "pacman reported an error. If it was a 404 or stale database, run 'sudo pacman -Syu' and re-run this script."
-            fi
-        fi
-
-        if [[ "${#AUR_PACKAGES[@]}" -gt 0 ]]; then
-            if [[ -n "$AUR_HELPER" ]]; then
-                info "Installing new AUR packages with $AUR_HELPER: ${AUR_PACKAGES[*]}"
-                if "$AUR_HELPER" -S --needed --noconfirm "${AUR_PACKAGES[@]}"; then
-                    success "AUR packages installed."
+                info "Installing new packages: ${FOUND[*]}"
+                # Void has no partial upgrades: install together with a full -Su.
+                if sudo xbps-install -Su "${FOUND[@]}"; then
+                    success "Packages installed."
                 else
-                    warning "$AUR_HELPER reported an error installing one or more packages. Continuing anyway."
+                    warning "xbps reported an error. Run 'sudo xbps-install -Su' and re-run this script."
                 fi
-            else
-                warning "No AUR helper found; cannot install: ${AUR_PACKAGES[*]}"
-                warning "Run install.sh once to bootstrap an AUR helper, or install one manually."
             fi
         fi
-
         if [[ "${#UNKNOWN_PACKAGES[@]}" -gt 0 ]]; then
-            warning "Could not resolve the following package(s) in any repo: ${UNKNOWN_PACKAGES[*]}"
-            warning "Check the name with 'pacman -Ss <name>' or https://aur.archlinux.org, then fix packages.txt."
+            warning "Not found in the repos: ${UNKNOWN_PACKAGES[*]}"
+            warning "Check the name with 'xbps-query -Rs <name>', then fix packages.txt."
         fi
     fi
 fi
@@ -224,7 +191,7 @@ if [[ "$SKIP_THEME" -eq 1 ]]; then
 elif command -v python3 >/dev/null 2>&1; then
     info "Regenerating theme from current palette..."
     if python3 "$CONFIG_DIR/43pr/bin/theme.py" apply; then
-        success "Theme regenerated and consumers reloaded (Kitty, Waybar)."
+        success "Theme regenerated and consumers reloaded (mango, Quickshell, Alacritty)."
     else
         error "Theme regeneration failed, check the error above."
         exit 1
@@ -238,9 +205,8 @@ fi
 # --------------------------------------------------
 
 printf '\n'
-warning "GTK apps (Thunar) cache colors per-process. If Thunar looks stale: thunar -q && thunar"
-warning "Rofi re-read CSS on next launch, no action needed."
-warning "Hyprlock re-reads its config on next lock, no action needed."
+warning "GTK apps cache colors per-process; reopen them if they look stale."
+warning "Rofi re-reads its theme on next launch, no action needed."
 
 if [[ "$RESTART_SHELL" -eq 1 ]]; then
     info "Restarting Quickshell (qs)..."

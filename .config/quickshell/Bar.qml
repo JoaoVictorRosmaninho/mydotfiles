@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Hyprland
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 
@@ -22,11 +21,11 @@ Scope {
             id: cfg
             property string position: "top"
             property string style: "floating"
-            property int thickness: 20
+            property int thickness: 30
             property int margin: 4
             property real scale: 1.0
-            property real bgOpacity: 1.0
-            property bool border: false
+            property real bgOpacity: 0.85
+            property bool border: true
             property bool showStats: true
             property bool showWs: true
             property bool showMedia: true
@@ -35,10 +34,10 @@ Scope {
             property bool showNet: true
             property bool showNotif: true
             property bool showWall: true
-            property bool showSettings: true
-            property string startMods: "stats,ws"
+            property bool showTitle: true
+            property string startMods: "ws,title"
             property string centerMods: "clock"
-            property string endMods: "media,volume,battery,net,notif,wall,settings,power"
+            property string endMods: "media,stats,volume,battery,net,notif,wall,power"
         }
     }
 
@@ -49,14 +48,14 @@ Scope {
     }
 
     function resetSettings() {
-        cfg.position = "top"; cfg.style = "joined"; cfg.thickness = 20; cfg.margin = 4;
-        cfg.scale = 1.0; cfg.bgOpacity = 0.7; cfg.border = false;
+        cfg.position = "top"; cfg.style = "floating"; cfg.thickness = 30; cfg.margin = 4;
+        cfg.scale = 1.0; cfg.bgOpacity = 0.85; cfg.border = true;
         cfg.showStats = false; cfg.showWs = true; cfg.showMedia = true;
         cfg.showVolume = true; cfg.showBattery = true; cfg.showNet = true;
-        cfg.showNotif = true; cfg.showWall = true; cfg.showSettings = true;
-        cfg.startMods = "stats,ws";
+        cfg.showNotif = true; cfg.showWall = true; cfg.showTitle = true;
+        cfg.startMods = "ws,title";
         cfg.centerMods = "clock";
-        cfg.endMods = "media,volume,battery,net,notif,wall,settings,power";
+        cfg.endMods = "media,stats,volume,battery,net,notif,wall,power";
     }
 
     readonly property bool vertical: cfg.position === "left" || cfg.position === "right"
@@ -64,24 +63,26 @@ Scope {
     readonly property int panelThick: vertical ? cfg.thickness + 12 : cfg.thickness
     readonly property int effEdge: cfg.style === "strip" ? 0 : cfg.margin
     readonly property int effGap: cfg.style === "strip" ? 0 : 6
-    readonly property real barRadius: cfg.style === "strip" ? 0 : Theme.radius
+    readonly property real barRadius: cfg.style === "strip" ? 0 : cfg.style === "floating" ? panelThick / 2 : Theme.radius
     readonly property color bgColor: Qt.alpha(Theme.bg, cfg.bgOpacity)
-    readonly property color borderColor: Qt.alpha(Theme.accent, 0.25)
+    readonly property color borderColor: Qt.alpha(Theme.accent, 0.14)
 
     function s(n) { return Math.round(n * cfg.scale); }
 
     readonly property int sizeCpuRam: s(12)
-    readonly property int sizeClock: s(12)
-    readonly property int sizeMarquee: s(11)
+    readonly property int sizeClock: s(13)
+    readonly property int sizeMarquee: s(12)
     readonly property int sizeMediaVertical: s(26)
-    readonly property int sizeNetIcon: s(16)
-    readonly property int sizeVolIcon: s(16)
+    readonly property int sizeNetIcon: s(17)
+    readonly property int sizeVolIcon: s(17)
     readonly property int sizeVolText: s(13)
     readonly property int sizeBatIcon: s(13)
     readonly property int sizeBatText: s(12)
-    readonly property int sizePowerIcon: s(13)
-    readonly property int sizeIconGap: 12
+    readonly property int sizePowerIcon: s(15)
+    readonly property int sizeIconGap: 7
     readonly property int iconYOffset: 1
+    readonly property int sizeTitle: s(12)
+    readonly property int sizeDate: s(11)
 
     readonly property int sizeCalTime: s(30)
     readonly property int sizeCalDate: s(12)
@@ -103,17 +104,17 @@ Scope {
     readonly property var batIcons: ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"]
     readonly property string batIcon: batIcons[batPct >= 90 ? 4 : batPct >= 65 ? 3 : batPct >= 40 ? 2 : batPct >= 15 ? 1 : 0]
 
-    readonly property var moduleIds: ["stats", "ws", "media", "volume", "battery", "net", "notif", "wall", "settings", "power"]
+    readonly property var moduleIds: ["stats", "ws", "title", "media", "volume", "battery", "net", "notif", "wall", "power"]
     readonly property var moduleDefs: [
         { id: "stats", l: "CPU / RAM (x)", k: "showStats" },
-        { id: "ws", l: "Workspaces", k: "showWs" },
+        { id: "ws", l: "Tags", k: "showWs" },
+        { id: "title", l: "Window title", k: "showTitle" },
         { id: "media", l: "Media", k: "showMedia" },
         { id: "volume", l: "Volume", k: "showVolume" },
         { id: "battery", l: "Battery", k: "showBattery" },
         { id: "net", l: "Network", k: "showNet" },
         { id: "notif", l: "Notifications", k: "showNotif" },
         { id: "wall", l: "Wallpapers", k: "showWall" },
-        { id: "settings", l: "Settings", k: "showSettings" },
         { id: "power", l: "Power", k: "" }
     ]
 
@@ -173,7 +174,7 @@ Scope {
         case "net": return cfg.showNet;
         case "notif": return cfg.showNotif;
         case "wall": return cfg.showWall;
-        case "settings": return cfg.showSettings;
+        case "title": return cfg.showTitle && !vertical && Mango.activeClient !== null && (Mango.activeClient.title || "") !== "";
         default: return true;
         }
     }
@@ -188,7 +189,7 @@ Scope {
         case "net": return netC;
         case "notif": return notifC;
         case "wall": return wallC;
-        case "settings": return settingsC;
+        case "title": return titleC;
         case "power": return powerC;
         default: return null;
         }
@@ -306,8 +307,8 @@ Scope {
     component Panel: Rectangle {
         property Item lane
         visible: lane ? (root.vertical ? lane.implicitHeight : lane.implicitWidth) > 0 : false
-        width: root.vertical ? root.panelThick : (lane ? lane.implicitWidth + 4 : 0)
-        height: root.vertical ? (lane ? lane.implicitHeight + 4 : 0) : root.panelThick
+        width: root.vertical ? root.panelThick : (lane ? lane.implicitWidth + 10 : 0)
+        height: root.vertical ? (lane ? lane.implicitHeight + 10 : 0) : root.panelThick
         radius: root.barRadius
         color: root.joined ? "transparent" : root.bgColor
         border.width: cfg.border && !root.joined ? 1 : 0
@@ -332,9 +333,19 @@ Scope {
         readonly property string shownGlyph: root.vertical ? vglyph : glyph
 
         Layout.alignment: Qt.AlignCenter
-        implicitWidth: root.vertical ? root.panelThick : content.implicitWidth + 20
+        implicitWidth: root.vertical ? root.panelThick : content.implicitWidth + 22
         implicitHeight: root.vertical ? Math.max(20, content.implicitHeight + 8)
                                       : Math.max(root.panelThick - 2, content.implicitHeight)
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width - (root.vertical ? 6 : 4)
+            height: root.vertical ? parent.height - 2 : root.panelThick - 8
+            radius: root.barRadius > 0 ? Math.min(height / 2, root.barRadius) : 0
+            color: Qt.alpha(Theme.accent, ma.pressed ? 0.22 : 0.12)
+            opacity: ma.containsMouse ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
+        }
 
         GridLayout {
             id: content
@@ -507,18 +518,20 @@ Scope {
             Mod {
                 baseSize: root.sizeCpuRam
                 glyphSize: root.sizeCpuRam + 4
+                glyph: "\uDB81\uDE1A"
                 vglyph: "\uDB81\uDE1A"
-                text: "CPU " + root.cpuUsage + "%"
+                text: root.cpuUsage + "%"
                 vtext: ""
-                color: root.vertical && root.cpuUsage >= 85 ? Theme.danger : Theme.text
+                color: root.cpuUsage >= 85 ? Theme.danger : Theme.textDim
             }
             Mod {
                 baseSize: root.sizeCpuRam
                 glyphSize: root.sizeCpuRam + 4
+                glyph: "\uDB80\uDF5B"
                 vglyph: "\uDB80\uDF5B"
-                text: "RAM " + root.memPercent + "%"
+                text: root.memPercent + "%"
                 vtext: ""
-                color: root.vertical && root.memPercent >= 85 ? Theme.danger : Theme.text
+                color: root.memPercent >= 85 ? Theme.danger : Theme.textDim
             }
         }
     }
@@ -526,37 +539,51 @@ Scope {
     Component {
         id: wsC
         Item {
+            id: wsItem
             implicitWidth: root.vertical ? root.panelThick : wsLane.implicitWidth + 12
             implicitHeight: wsLane.implicitHeight + (root.vertical ? 12 : 0)
 
             Lane {
                 id: wsLane
                 anchors.centerIn: parent
-                gap: 8
+                gap: 5
 
                 Repeater {
-                    model: Hyprland.workspaces
+                    model: Mango.tagsFor(wsItem.QsWindow.window && wsItem.QsWindow.window.screen
+                        ? wsItem.QsWindow.window.screen.name : "")
                     delegate: Rectangle {
                         id: dot
                         required property var modelData
-                        visible: modelData.id > 0
+                        visible: modelData.occupied || modelData.focused
                         Layout.alignment: Qt.AlignCenter
-                        implicitWidth: root.vertical ? 10 : (modelData.focused ? 32 : 10)
-                        implicitHeight: root.vertical ? (modelData.focused ? 24 : 10) : 10
-                        radius: 5
+                        readonly property int base: root.panelThick - 10
+                        implicitWidth: root.vertical ? base : (modelData.focused ? base * 1.9 : base)
+                        implicitHeight: root.vertical ? (modelData.focused ? base * 1.9 : base) : base
+                        radius: base / 2
                         color: modelData.urgent ? Theme.danger
-                             : modelData.focused ? Qt.alpha(Theme.accent, 0.2)
-                             : dotMa.containsMouse ? Theme.accent2
-                             : Qt.alpha(Theme.textFaint, 0.5)
+                             : modelData.focused ? Theme.accent
+                             : dotMa.containsMouse ? Qt.alpha(Theme.accent, 0.18)
+                             : Qt.alpha(Theme.text, 0.06)
 
                         Behavior on implicitWidth { NumberAnimation { duration: Theme.animMed; easing.type: Easing.OutQuad } }
                         Behavior on implicitHeight { NumberAnimation { duration: Theme.animMed; easing.type: Easing.OutQuad } }
+                        Behavior on color { ColorAnimation { duration: Theme.animFast } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: dot.modelData.id
+                            color: dot.modelData.focused || dot.modelData.urgent ? Theme._bgBase : Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: s(11)
+                            font.bold: true
+                            function s(n) { return root.s(n) }
+                        }
 
                         MouseArea {
                             id: dotMa
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: dot.modelData.activate()
+                            onClicked: Mango.viewTag(dot.modelData.id, dot.modelData.monitor)
                         }
                     }
                 }
@@ -564,9 +591,22 @@ Scope {
 
             WheelHandler {
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                onWheel: e => root.run(e.angleDelta.y > 0
-                    ? "hyprctl dispatch 'hl.dsp.focus({workspace=\"e+1\"})'"
-                    : "hyprctl dispatch 'hl.dsp.focus({workspace=\"e-1\"})'")
+                onWheel: e => e.angleDelta.y > 0 ? Mango.nextTag() : Mango.prevTag()
+            }
+        }
+    }
+
+    Component {
+        id: titleC
+        Mod {
+            readonly property var client: Mango.activeClient
+            baseSize: root.sizeTitle
+            glyphSize: root.sizeTitle + 2
+            color: Theme.textDim
+            glyph: "\uDB82\uDCC6"
+            text: {
+                const t = client ? (client.title || "") : "";
+                return t.length > 60 ? t.substring(0, 59) + "…" : t;
             }
         }
     }
@@ -713,16 +753,6 @@ Scope {
             yOffset: root.iconYOffset
             text: "\uDB80\uDEE9"
             onClicked: root.run("qs -n -p ~/.config/quickshell/hyprquickpaper")
-        }
-    }
-
-    Component {
-        id: settingsC
-        Mod {
-            baseSize: root.sizeNetIcon
-            yOffset: root.iconYOffset
-            text: "\uDB81\uDC93"
-            onClicked: root.run("qs ipc call settings toggle")
         }
     }
 
@@ -992,7 +1022,8 @@ Scope {
                             id: clockMod
                             bold: true
                             baseSize: root.sizeClock
-                            text: Qt.formatDateTime(clk.date, "HH:mm")
+                            text: Qt.formatDateTime(clk.date, "HH:mm") + "  <font color=\"" + Theme.textDim + "\">"
+                                  + Qt.formatDateTime(clk.date, "ddd dd MMM") + "</font>"
                             vtext: Qt.formatDateTime(clk.date, "HH") + "\n" + Qt.formatDateTime(clk.date, "mm")
                             onClicked: mouse => {
                                 if (mouse.button === Qt.RightButton) {

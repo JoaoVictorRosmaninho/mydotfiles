@@ -1,10 +1,10 @@
 <div align="center">
 
-## Hyprland Setup by 43pr メ
+## 43pr Setup — MangoWC / Void Linux port
 
-A clean and simple Hyprland setup focused on practical keybinds, productivity, and easy to customize.
+A port of 43pr's Hyprland setup to **MangoWC** on **Void Linux** — a clean and simple setup focused on practical keybinds, productivity, and easy to customize.
 
-![Hyprland](https://img.shields.io/badge/Hyprland-0.56.2-8b9aaf?style=for-the-badge&labelColor=101418)
+![MangoWC](https://img.shields.io/badge/MangoWC-0.14-8b9aaf?style=for-the-badge&labelColor=101418)
 ![GitHub repo size](https://img.shields.io/github/repo-size/43PR/dotfiles?style=for-the-badge&labelColor=101418&color=8b9aaf)
 [![Discord](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fdiscord.com%2Fapi%2Finvites%2FHQwU9SzHj%3Fwith_counts%3Dtrue&query=%24.approximate_member_count&style=for-the-badge&logo=discord&logoColor=ffffff&label=discord&labelColor=101418&color=7289a8)](https://discord.gg/HQwU9SzHj)
 [![YouTube](https://img.shields.io/badge/youtube-subscribe-b05a63?style=for-the-badge&logo=youtube&logoColor=ffffff&labelColor=101418)](https://www.youtube.com/@43PR2)
@@ -27,10 +27,10 @@ Wallpapers: https://wallhaven.cc/user/43pr
 - **Wallpaper picker & Dynamic Colors** — Custom wallpaper selector with automatic wallpaper-based color generation.
 - **Preset Themes** — Default Monochrome, Nord, Tokyo Night, etc, and easily create your own. 
 - **App Launcher** — **Rofi** Application search, clipboard history, and opacity control.
-- **Zsh + Starship** — Customizable shell with autosuggestions and history.
+- **Fish + Starship** — Starship prompt theme (the login shell is left untouched).
 - **Customizable Power Menu** —  Custom power menu. 
 - **Notes / To do** —  Custom quick Notes/To-do. 
-- **Hyprlock** — Custom lock screen.
+- **Lock screen** — Quickshell lock (ext-session-lock + PAM via /etc/pam.d/system-auth), replaces Hyprlock.
 - **Spotify + Spicetify** — Custom theme based on **text - darkthemer**, (modified).
 - **Custom Scripts** — Scripts for workflow and system management.
 
@@ -42,77 +42,75 @@ Just made some tweaks to it. Give it some love: [hyprquickpaper](https://github.
 
 ## Keybinds
 
-> **You can modify keybinds using HyprMod**
+> Your existing mango binds are kept; these are the ones added for the shell.
+> All keybinds: [.config/mango/binds.conf](.config/mango/binds.conf)
 
 | Keybind                 | Action                    |
 | -----------             | ------------------------- |
-| `Super + T`             | Terminal                  |
-| `Super + Q`             | Close active window       |
-| `Super + D`             | Application launcher      |
-| `Super + Space`         | Toggle floating window    |
-| `Super + F`             | Toggle fullscreen         |
-| `Super + 1, 2, 3..`     | Change workspaces         |
-| `Super + Shift + 1, 2..`| Move window to workspace  |
-| `Super + E`             | File manager              |
-| `Super + B`             | Browser                   |
+| `Super + Shift + Enter` | Terminal (Alacritty)      |
+| `Super + P`             | Application launcher (Rofi) |
 | `Super + V`             | Clipboard history         |
-| `Super + S`             | Second launcher           |
-| `Super + I`             | Settings menu             |
+| `Super + Q`             | Close active window       |
+| `Super + E`             | File manager              |
+| `Super + 1..9`          | View tag                  |
+| `Alt + 1..9`            | Move window to tag        |
+| `Super + A`             | Settings menu             |
+| `Super + Grave`         | Power menu                |
+| `Super + X`             | Notifications             |
+| `Super + D`             | Notes / To-do             |
+| `Super + Z`             | Wheel launcher            |
 | `Super + W`             | Wallpaper selector        |
-| `Super + O`             | Switch opacity            |
-| `Super + Tab`           | Lock screen               |
-| `Super + Grave`         | Logout menu               |
 | `Super + Shift + W`     | Toggle bar                |
-| `Super + Mouse wheel`   | Zoom in/out               |
-| `Super + C`             | Notes/To-do               |
-| `Super + N`             | Notifications             |
-| `Delete`                | Screenshot fullscreen     |
-| `SHIFT + Delete`        | Screenshot area select    |
+| `Super + Escape`        | Lock screen               |
+| `Super + Shift + O`     | Switch opacity            |
+| `Super + Shift + L`     | Light/dark toggle         |
+| `Print`                 | Screenshot fullscreen     |
+| `Shift + Print`         | Screenshot area select    |
 
 > [!note]
 >
 > **Move and resize windows with Super + left/right mouse drag.**
->
-> All keybinds: [.config/hypr/keybinds.lua](.config/hypr/keybinds.lua)
+
+### What changed from the Hyprland version
+
+| Hyprland                         | MangoWC port                                         |
+| -------------------------------- | ---------------------------------------------------- |
+| `Quickshell.Hyprland`            | `quickshell/Mango.qml` (reads `mmsg watch all-monitors`) |
+| workspaces                       | mango tags (only occupied/active ones are shown)     |
+| `hyprctl` monitor config         | `wlr-randr`, saved to `quickshell/state/display.sh` and replayed at login |
+| `hyprlock`                       | `quickshell/Lock.qml` (`qs ipc call lock lock`)      |
+| `hypr/*.lua`                     | `mango/{config,autostart,binds,rules}.conf`; `mango/colors.conf` is generated by the theme |
+| kitty / zsh                      | Alacritty colors (`alacritty/colors.toml`) / fish + starship |
+| pacman / yay / systemd           | xbps / runit / elogind (`loginctl`)                  |
+
+Machine-specific settings (monitors, etc.) go in `~/.config/mango/local.conf`, which is optional and not versioned.
 
 ---
-## Installation 
+## Installation
 
 **READ ALL**
 
-Works for Arch, CachyOS, EndeavourOS, Manjaro, etc. 
-
-This is mainly intended for a clean installation (existing configuration files that are being replaced will be backed up automatically).
-
-**First install git then use the next command and continue the installation until it's finished**
+Works on **Void Linux** (glibc). Void does not support partial upgrades, so the installer runs a full `xbps-install -Su` before installing anything.
 
 ```bash
-sudo pacman -S git   
-```
-
-```bash
-git clone https://github.com/43PR/dotfiles.git
-cd dotfiles
-chmod +x install.sh
+sudo xbps-install -S git
+git clone <this repo> ~/dotfiles
+cd ~/dotfiles
 ./install.sh
 ```
 
-After the installation finishes log out and back in.
+Existing configuration files that get replaced are backed up to `~/.config-backups/<date>/`. The installer also enables the runit services the shell needs (`NetworkManager`, replacing `dhcpcd`, and `power-profiles-daemon`).
 
-It will show an empty desktop, dowload and move wallpapers to Pictures/Wallpapers, then you can use the wallpaper picker with: Super + W.
+After the installation finishes log out and back in to mango. Put wallpapers in `~/Pictures/Wallpapers` and pick one with `Super + W`.
 
 > [!important]
 > **Do not move or delete the dotfiles repository after installation.**
 >
-> This setup uses **symbolic links (symlinks)** that point to files inside the cloned repository. If you move or delete the repository, those symlinks will break.
->
-> If you relocate the repository, simply run:
->
-> ```bash
-> ./install.sh
-> ```
->
-> The installer will automatically update the existing symlinks to point to the new location.
+> This setup uses **symbolic links (symlinks)** that point to files inside the cloned repository. If you relocate the repository, run `./install.sh --skip-packages` again to repoint them.
+
+> [!warning]
+> **Lock screen recovery:** if Quickshell crashes while the screen is locked, mango keeps the session locked (that is the point of ext-session-lock). Switch to a TTY (`Ctrl+Alt+F2`), log in and run
+> `WAYLAND_DISPLAY=wayland-0 qs -d` to bring the shell back, then unlock normally.
 
 ---
 ## Updating

@@ -7,7 +7,7 @@ Item {
     property string homeDir: ""
     property string uptime: "..."
     property string os: "..."
-    property string wm: "Hyprland"
+    property string wm: "MangoWC"
     property string cpu: "Loading..."
     property string gpu: "Loading..."
     property string memory: "Loading..."
@@ -21,8 +21,8 @@ Item {
     property var gpuHistory: []
     property var memoryHistory: []
     property var cpuPrev: null
-    property int hardwareLabelSize: 12
-    property int hardwareTextSize: 12
+    property int hardwareLabelSize: 14
+    property int hardwareTextSize: 14
     property string mono: "JetBrainsMono Nerd Font"
     property int rightMargin: 46
     property string currentTime: ""
@@ -137,7 +137,7 @@ Item {
             text: icon + "  " + label
             color: Theme.textDim
             font.family: page.mono
-            font.pixelSize: 10
+            font.pixelSize: 12
             font.letterSpacing: 2
         }
 
@@ -145,7 +145,7 @@ Item {
             text: value
             color: Theme.text
             font.family: Theme.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: 16
             elide: Text.ElideRight
             width: 500
         }
@@ -191,7 +191,7 @@ Item {
                     text: modelData
                     color: Theme.text
                     font.family: page.mono
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -231,7 +231,7 @@ Item {
                 color: Theme.text
                 opacity: 0.35
                 font.family: page.mono
-                font.pixelSize: 8
+                font.pixelSize: 10
             }
 
             Text {
@@ -240,7 +240,7 @@ Item {
                 color: Theme.text
                 opacity: 0.35
                 font.family: page.mono
-                font.pixelSize: 8
+                font.pixelSize: 10
             }
         }
     }
@@ -418,7 +418,7 @@ Item {
                 text: "SYSTEM"
                 color: Theme.text
                 font.family: Theme.fontFamily
-                font.pixelSize: 19
+                font.pixelSize: 23
                 font.letterSpacing: 3
             }
 
@@ -491,7 +491,7 @@ Item {
         text: page.currentTime
         color: Theme.text
         font.family: page.mono
-        font.pixelSize: 18
+        font.pixelSize: 22
         font.letterSpacing: 1
     }
 }

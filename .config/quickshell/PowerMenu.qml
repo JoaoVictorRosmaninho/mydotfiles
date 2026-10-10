@@ -3,7 +3,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Hyprland
 
 PanelWindow {
     id: root
@@ -166,11 +165,12 @@ PanelWindow {
     }
 
     readonly property var actions: [
-        { name: "shutdown",  label: "Shut down", icon: "shutdown.png",  key: "s", cmd: ["systemctl", "poweroff"] },
-        { name: "reboot",    label: "Reboot",    icon: "reboot.png",    key: "r", cmd: ["systemctl", "reboot"] },
-        { name: "suspend",   label: "Suspend",   icon: "suspend.png",   key: "z", cmd: ["systemctl", "suspend"] },
-        { name: "logout",    label: "Log out",   icon: "logout.png",    key: "e", dispatch: "hl.dsp.exit()" },
-        { name: "hibernate", label: "Hibernate", icon: "hibernate.png", key: "h", cmd: ["systemctl", "hibernate"] }
+        { name: "lock",      label: "Lock",      icon: "lock.png",      key: "l", cmd: ["qs", "ipc", "call", "lock", "lock"] },
+        { name: "shutdown",  label: "Shut down", icon: "shutdown.png",  key: "s", cmd: ["loginctl", "poweroff"] },
+        { name: "reboot",    label: "Reboot",    icon: "reboot.png",    key: "r", cmd: ["loginctl", "reboot"] },
+        { name: "suspend",   label: "Suspend",   icon: "suspend.png",   key: "z", cmd: ["loginctl", "suspend"] },
+        { name: "logout",    label: "Log out",   icon: "logout.png",    key: "e", dispatch: "quit" },
+        { name: "hibernate", label: "Hibernate", icon: "hibernate.png", key: "h", cmd: ["loginctl", "hibernate"] }
     ]
 
     readonly property var visibleActions: actions.filter(function (a) {
@@ -188,14 +188,14 @@ PanelWindow {
 
     function runAction(a) {
         if (a.dispatch)
-            Hyprland.dispatch(a.dispatch)
+            Mango.dispatch(a.dispatch)
         else if (a.cmd)
             Quickshell.execDetached({ command: a.cmd })
         root.closeMenu()
     }
 
     function openMenu() {
-        var mon = Hyprland.focusedMonitor
+        var mon = Mango.focusedMonitor
         if (mon) {
             var scr = Quickshell.screens.find(function (s) { return s.name === mon.name })
             if (scr) root.screen = scr

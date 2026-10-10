@@ -6,6 +6,8 @@ Item {
     default property alias content: contentContainer.data
     property bool open: false
     property real tiltStrength: Theme.tiltStrength
+    // false = no parallax tilt following the pointer (open/close animation is kept)
+    property bool followMouse: true
 
     property real parallaxX: 0
     property real parallaxY: 0
@@ -51,6 +53,7 @@ Item {
 
     HoverHandler {
         id: hover
+        enabled: root.followMouse
         onPointChanged: {
             var nx = (point.position.x / root.width) - 0.5
             var ny = (point.position.y / root.height) - 0.5

@@ -264,7 +264,7 @@ Item {
         spacing: 14
         Text {
             text: "NETWORK"; color: Theme.text
-            font.family: page.monoFont; font.pixelSize: 19; font.letterSpacing: 3
+            font.family: page.monoFont; font.pixelSize: 23; font.letterSpacing: 3
         }
         Rectangle { width: parent.width; height: 1; color: Theme.border }
         Column {
@@ -288,7 +288,7 @@ Item {
                     text: page.wifiEnabled ? "WI-FI ON" : "WI-FI OFF"
                     color: page.wifiEnabled ? Theme.accent : Theme.textFaint
                     font.family: page.monoFont
-                    font.pixelSize: 10
+                    font.pixelSize: 12
                     font.bold: true
                     font.letterSpacing: 1
                 }
@@ -328,7 +328,7 @@ Item {
                             text: modelData.icon
                             color: modelData.down ? Theme.accent : Theme.accent2
                             font.family: Theme.iconFont
-                            font.pixelSize: 14
+                            font.pixelSize: 17
                         }
 
                         Text {
@@ -338,7 +338,7 @@ Item {
                             text: modelData.label
                             color: Theme.textDim
                             font.family: page.monoFont
-                            font.pixelSize: 12
+                            font.pixelSize: 14
                             font.letterSpacing: 1.5
                         }
 
@@ -349,7 +349,7 @@ Item {
                             text: page.formatSpeed(modelData.value)
                             color: Theme.text
                             font.family: page.monoFont
-                            font.pixelSize: 12
+                            font.pixelSize: 14
                             font.bold: true
                         }
                     }
@@ -379,7 +379,7 @@ Item {
                     text: page.icEth
                     color: page.ethernet.state === "connected" ? Theme.accent2 : Theme.textDim
                     font.family: Theme.iconFont
-                    font.pixelSize: 15
+                    font.pixelSize: 18
                 }
 
                 Column {
@@ -390,7 +390,7 @@ Item {
                         text: "Ethernet"
                         color: Theme.text
                         font.family: page.monoFont
-                        font.pixelSize: 12
+                        font.pixelSize: 14
                     }
 
                     Text {
@@ -399,7 +399,7 @@ Item {
                             : "Disconnected"
                         color: Theme.textDim
                         font.family: page.monoFont
-                        font.pixelSize: 10
+                        font.pixelSize: 12
                     }
                 }
             }
@@ -411,7 +411,7 @@ Item {
                 text: page.ethernet.state === "connected" ? "CONNECTED" : "DISCONNECTED"
                 color: page.ethernet.state === "connected" ? Theme.accent2 : Theme.textDim
                 font.family: page.monoFont
-                font.pixelSize: 10
+                font.pixelSize: 12
                 font.letterSpacing: 1
             }
         }
@@ -439,7 +439,7 @@ Item {
                         text: "Wi-Fi is disabled"
                         color: Theme.textDim
                         font.family: page.monoFont
-                        font.pixelSize: 12
+                        font.pixelSize: 14
                         horizontalAlignment: Text.AlignHCenter
                     }
 
@@ -449,7 +449,7 @@ Item {
                         text: "Scanning Wi-Fi networks"
                         color: Theme.textDim
                         font.family: page.monoFont
-                        font.pixelSize: 12
+                        font.pixelSize: 14
                         horizontalAlignment: Text.AlignHCenter
                     }
 
@@ -480,7 +480,7 @@ Item {
                                     text: modelData.connected ? "DISCONNECT" : "CONNECT"
                                     color: modelData.connected ? Theme.danger : Theme.accent
                                     font.family: page.monoFont
-                                    font.pixelSize: 10
+                                    font.pixelSize: 12
 
                                     MouseArea {
                                         anchors.fill: parent
@@ -509,7 +509,7 @@ Item {
                                         text: page.icWifi
                                         color: modelData.connected ? Theme.accent : Theme.textDim
                                         font.family: Theme.iconFont
-                                        font.pixelSize: 14
+                                        font.pixelSize: 17
                                     }
 
                                     Text {
@@ -517,7 +517,7 @@ Item {
                                         text: page.icLock
                                         color: Theme.textFaint
                                         font.family: Theme.iconFont
-                                        font.pixelSize: 10
+                                        font.pixelSize: 12
                                         anchors.verticalCenter: parent.verticalCenter
                                     }
 
@@ -525,7 +525,7 @@ Item {
                                         text: modelData.ssid
                                         color: Theme.text
                                         font.family: page.monoFont
-                                        font.pixelSize: 12
+                                        font.pixelSize: 14
                                         elide: Text.ElideRight
                                         width: Math.min(implicitWidth, list.width - 190)
                                     }
@@ -552,7 +552,7 @@ Item {
                                         anchors.margins: 8
                                         color: Theme.text
                                         font.family: page.monoFont
-                                        font.pixelSize: 12
+                                        font.pixelSize: 14
                                         echoMode: TextInput.Password
                                         focus: page.pendingSsid === modelData.ssid
 
@@ -567,7 +567,7 @@ Item {
                                     text: "CONNECT"
                                     color: Theme.accent2
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: 11
+                                    font.pixelSize: 13
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     MouseArea {

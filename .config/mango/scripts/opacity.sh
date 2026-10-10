@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/sh
+# Window + shell opacity picker (mango port of 43pr's hypr/scripts/opacity.sh)
 
 choice=$(printf "100%%\n90%%\n80%%\n70%%\n60%%\n50%%\n40%%" | rofi -dmenu -p "")
 
@@ -13,12 +14,8 @@ case "$choice" in
     *) exit 0 ;;
 esac
 
-sed -i --follow-symlinks "0,/opacity = \".* override\"/s//opacity = \"$opacity override\"/" ~/.config/hypr/rules.lua
-sed -i -E "s/(property real bgAlpha: )[0-9.]+/\1$opacity/" ~/.config/quickshell/Theme.qml
+sed -i --follow-symlinks -E "s/^(focused_opacity=).*/\1$opacity/; s/^(unfocused_opacity=).*/\1$opacity/" ~/.config/mango/config.conf
+sed -i --follow-symlinks -E "s/(property real bgAlpha: )[0-9.]+/\1$opacity/" ~/.config/quickshell/Theme.qml
 sed -i -E "s/(bg:[[:space:]]*#[0-9A-Fa-f]{6})([0-9A-Fa-f]{2})?;/\1$alpha;/" ~/.config/rofi/colors.rasi
 
-hyprctl reload
-
-pkill qs
-sleep 0.2
-qs &
+mmsg dispatch reload_config

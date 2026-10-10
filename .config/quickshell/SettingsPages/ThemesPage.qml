@@ -14,7 +14,7 @@ Item {
 
     function editConfig(path) {
         Quickshell.execDetached([
-            "xed",
+            "gedit",
             path.replace(/^~/, Quickshell.env("HOME"))
         ])
     }
@@ -89,7 +89,7 @@ Item {
             text: label + ": " + valueText
             color: checked ? Theme.accent : Theme.textDim
             font.family: Theme.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: 13
             font.bold: true
             font.letterSpacing: 1
             horizontalAlignment: Text.AlignHCenter
@@ -135,7 +135,7 @@ Item {
             text: label
             color: Theme.textDim
             font.family: Theme.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: 16
             font.bold: true
             font.letterSpacing: 2
         }
@@ -150,7 +150,7 @@ Item {
                 text: "\uf120"
                 color: Theme.textDim
                 font.family: Theme.iconFont
-                font.pixelSize: 13
+                font.pixelSize: 16
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -158,7 +158,7 @@ Item {
                 text: "EDIT " + path.split("/").pop().toUpperCase()
                 color: Theme.textDim
                 font.family: Theme.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: 14
                 font.bold: true
                 font.letterSpacing: 1
                 anchors.verticalCenter: parent.verticalCenter
@@ -201,7 +201,7 @@ Item {
             text: label
             color: Theme.textDim
             font.family: Theme.fontFamily
-            font.pixelSize: 11
+            font.pixelSize: 13
             font.bold: true
             font.letterSpacing: 1
             horizontalAlignment: Text.AlignHCenter
@@ -267,7 +267,7 @@ Item {
                 text: "THEMES"
                 color: Theme.text
                 font.family: Theme.fontFamily
-                font.pixelSize: 19
+                font.pixelSize: 23
                 font.letterSpacing: 3
             }
 

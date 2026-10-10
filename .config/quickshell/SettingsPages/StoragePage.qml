@@ -7,7 +7,7 @@ Item {
     id: page
     property var drives: []
     property var filesystems: []
-    property var cleanupInfo: ({yay:0, pacman:0, journal:0, trash:0, flatpak:0, cliphist:0, thumbs:0})
+    property var cleanupInfo: ({xbps:0, trash:0, flatpak:0, cliphist:0, thumbs:0})
     property var sdaUsageData: null
     property real marginLeft: 0
     property real marginRight: 55
@@ -17,7 +17,7 @@ Item {
     property string pendingTitle: ""
     property string pendingMessage: ""
 
-    readonly property var cleanupDefaults: ({yay:0, pacman:0, journal:0, trash:0, flatpak:0, cliphist:0, thumbs:0})
+    readonly property var cleanupDefaults: ({xbps:0, trash:0, flatpak:0, cliphist:0, thumbs:0})
     readonly property var sizeUnits: ({
         B:1, K:1024, KB:1024, KIB:1024,
         M:1048576, MB:1048576, MIB:1048576,
@@ -121,9 +121,7 @@ Item {
         command: [
             "sh", "-c",
             "p() { printf '%s %s\\n' \"$1\" \"${2:-0}\"; }; " +
-            "p YAY \"$(du -sb \"$HOME/.cache/yay\" 2>/dev/null | awk '{print $1}')\"; " +
-            "p PACMAN \"$(du -sb /var/cache/pacman/pkg 2>/dev/null | awk '{print $1}')\"; " +
-            "p JOURNAL \"$(journalctl --disk-usage 2>/dev/null | grep -oE '[0-9.]+ ?[BKMGT]' | tail -1 | tr -d ' ')\"; " +
+            "p XBPS \"$(du -sb /var/cache/xbps 2>/dev/null | awk '{print $1}')\"; " +
             "p TRASH \"$(du -sb \"$HOME/.local/share/Trash\" 2>/dev/null | awk '{print $1}')\"; " +
             "p FLATPAK \"$(flatpak uninstall --unused --assumeno 2>/dev/null | grep -oE '[0-9.]+ ?(kB|MB|GB|TB)' | tail -1 | tr -d ' ')\"; " +
             "p CLIPHIST \"$(cliphist list 2>/dev/null | wc -l)\"; " +
@@ -131,7 +129,7 @@ Item {
         ]
         stdout: StdioCollector {
             onStreamFinished: {
-                var info = {yay: 0, pacman: 0, journal: 0, trash: 0, flatpak: 0, cliphist: 0, thumbs: 0}
+                var info = {xbps: 0, trash: 0, flatpak: 0, cliphist: 0, thumbs: 0}
                 var lines = text.trim().split("\n")
                 for (var i = 0; i < lines.length; ++i) {
                     var p = lines[i].trim().split(/\s+/)
@@ -161,11 +159,11 @@ Item {
             anchors.fill: parent; anchors.margins: 18; spacing: 12
             Text {
                 text: page.pendingTitle; color: Theme.text
-                font.family: Theme.fontFamily; font.pixelSize: 17; font.bold: true
+                font.family: Theme.fontFamily; font.pixelSize: 20; font.bold: true
             }
             Text {
                 width: parent.width; text: page.pendingMessage; color: Theme.textDim
-                font.family: Theme.fontFamily; font.pixelSize: 13; wrapMode: Text.WordWrap
+                font.family: Theme.fontFamily; font.pixelSize: 16; wrapMode: Text.WordWrap
             }
             Item { width: 1; height: 1 }
             Row {
@@ -193,7 +191,7 @@ Item {
 
         Text {
             text: "STORAGE"; color: Theme.text
-            font.family: Theme.fontFamily; font.pixelSize: 19; font.letterSpacing: 3
+            font.family: Theme.fontFamily; font.pixelSize: 23; font.letterSpacing: 3
         }
 
         Rectangle { width: parent.width; height: 1; color: Theme.border }
@@ -225,7 +223,7 @@ Item {
 
                     Text {
                         text: "DRIVES"; color: Theme.text
-                        font.family: Theme.fontFamily; font.pixelSize: 15; font.bold: true; font.letterSpacing: 2
+                        font.family: Theme.fontFamily; font.pixelSize: 18; font.bold: true; font.letterSpacing: 2
                     }
 
                     Repeater {
@@ -244,13 +242,13 @@ Item {
                                     Text {
                                         width: parent.width - 70; text: modelData.model || modelData.name || "SSD/HDD"
                                         color: Theme.text; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
-                                        font.family: Theme.fontFamily; font.pixelSize: 13; font.bold: true
+                                        font.family: Theme.fontFamily; font.pixelSize: 16; font.bold: true
                                     }
                                     Text {
                                         width: 70; text: hasUsage ? Math.round(usedPct) + "%" : "--%"
                                         color: hasUsage ? page.usageColor(usedPct) : Theme.textDim
                                         horizontalAlignment: Text.AlignRight; verticalAlignment: Text.AlignVCenter
-                                        font.family: Theme.fontFamily; font.pixelSize: 12; font.bold: true
+                                        font.family: Theme.fontFamily; font.pixelSize: 14; font.bold: true
                                     }
                                 }
 
@@ -269,16 +267,16 @@ Item {
                                     width: parent.width; height: 13; spacing: 14
                                     Text {
                                         text: page.sdaUsageData ? page.formatBytes(page.sdaUsageData.used) + " USED" : "-- USED"
-                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 11
+                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 13
                                     }
                                     Text {
                                         text: page.sdaUsageData && modelData.size > page.sdaUsageData.used
                                             ? page.formatBytes(modelData.size - page.sdaUsageData.used) + " FREE" : "-- FREE"
-                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 11
+                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 13
                                     }
                                     Text {
                                         text: page.formatBytes(modelData.size) + " TOTAL"
-                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 11
+                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 13
                                     }
                                 }
                             }
@@ -287,7 +285,7 @@ Item {
 
                     Text {
                         text: "FILESYSTEM"; color: Theme.text; topPadding: 4
-                        font.family: Theme.fontFamily; font.pixelSize: 15; font.bold: true; font.letterSpacing: 2
+                        font.family: Theme.fontFamily; font.pixelSize: 18; font.bold: true; font.letterSpacing: 2
                     }
 
                     Repeater {
@@ -304,12 +302,12 @@ Item {
                                     Text {
                                         width: parent.width - 55; text: modelData.mount
                                         color: Theme.text; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
-                                        font.family: Theme.fontFamily; font.pixelSize: 13; font.bold: true
+                                        font.family: Theme.fontFamily; font.pixelSize: 16; font.bold: true
                                     }
                                     Text {
                                         width: 55; text: modelData.percent + "%"; color: page.usageColor(modelData.percent)
                                         horizontalAlignment: Text.AlignRight; verticalAlignment: Text.AlignVCenter
-                                        font.family: Theme.fontFamily; font.pixelSize: 12; font.bold: true
+                                        font.family: Theme.fontFamily; font.pixelSize: 14; font.bold: true
                                     }
                                 }
 
@@ -327,15 +325,15 @@ Item {
                                     width: parent.width; height: 13; spacing: 14
                                     Text {
                                         text: page.formatBytes(modelData.used) + " USED"
-                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 11
+                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 13
                                     }
                                     Text {
                                         text: page.formatBytes(modelData.available) + " FREE"
-                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 11
+                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 13
                                     }
                                     Text {
                                         text: page.formatBytes(modelData.total) + " TOTAL"
-                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 11
+                                        color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: 13
                                     }
                                 }
                             }
@@ -344,7 +342,7 @@ Item {
 
                     Text {
                         text: "CLEANUP"; color: Theme.text; topPadding: 4
-                        font.family: Theme.fontFamily; font.pixelSize: 15; font.bold: true; font.letterSpacing: 2
+                        font.family: Theme.fontFamily; font.pixelSize: 18; font.bold: true; font.letterSpacing: 2
                     }
 
                     Repeater {
@@ -365,19 +363,9 @@ Item {
                                 command: "rm -rf -- \"$HOME/.cache/quickshell/thumbs/\"*"
                             },
                             {
-                                key: "yay", label: "YAY CACHE", action: "CLEAN", title: "CLEAR YAY CACHE?",
+                                key: "xbps", label: "XBPS CACHE", action: "CLEAN", title: "CLEAN XBPS CACHE?",
                                 message: "CACHE_PLACEHOLDER",
-                                command: "rm -rf -- \"$HOME/.cache/yay/\"*"
-                            },
-                            {
-                                key: "pacman", label: "PACMAN CACHE", action: "CLEAN", title: "CLEAN PACMAN CACHE?",
-                                message: "paccache will remove old package versions while keeping the currently installed packages.",
-                                command: "sudo paccache -r"
-                            },
-                            {
-                                key: "journal", label: "JOURNAL", action: "7 DAYS", title: "VACUUM JOURNAL?",
-                                message: "Keep only the last 7 days of system logs.",
-                                command: "sudo journalctl --vacuum-time=7d"
+                                command: "pkexec xbps-remove -O"
                             },
                             {
                                 key: "flatpak", label: "FLATPAK UNUSED", action: "CLEAN", title: "REMOVE UNUSED FLATPAKS?",
@@ -395,7 +383,7 @@ Item {
                             onClicked: page.confirmAction(
                                 modelData.title,
                                 modelData.message === "CACHE_PLACEHOLDER"
-                                    ? page.formatBytes(page.cleanupInfo.yay) + " currently in ~/.cache/yay"
+                                    ? page.formatBytes(page.cleanupInfo.xbps) + " in /var/cache/xbps. Removes outdated package files (xbps-remove -O)."
                                     : modelData.message,
                                 modelData.command
                             )
@@ -416,7 +404,7 @@ Item {
         Text {
             anchors.centerIn: parent; text: parent.label
             color: parent.accent ? Theme.accent : Theme.textDim
-            font.family: Theme.fontFamily; font.pixelSize: 11; font.bold: true; font.letterSpacing: .5
+            font.family: Theme.fontFamily; font.pixelSize: 13; font.bold: true; font.letterSpacing: .5
         }
 
         MouseArea {
@@ -448,7 +436,7 @@ Item {
             text: cleanupRoot.label
             color: Theme.textDim
             font.family: Theme.fontFamily
-            font.pixelSize: 13
+            font.pixelSize: 16
             font.bold: true
             font.letterSpacing: 2
         }
@@ -463,7 +451,7 @@ Item {
                 text: cleanupRoot.value
                 color: Theme.textDim
                 font.family: Theme.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: 14
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -471,7 +459,7 @@ Item {
                 text: cleanupRoot.actionText
                 color: Theme.textDim
                 font.family: Theme.fontFamily
-                font.pixelSize: 12
+                font.pixelSize: 14
                 font.bold: true
                 font.letterSpacing: 1
                 anchors.verticalCenter: parent.verticalCenter

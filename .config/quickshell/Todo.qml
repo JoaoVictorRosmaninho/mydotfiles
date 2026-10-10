@@ -4,7 +4,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Hyprland
 
 PanelWindow {
     id: root
@@ -163,7 +162,7 @@ PanelWindow {
     }
 
     function openMenu() {
-        var mon = Hyprland.focusedMonitor
+        var mon = Mango.focusedMonitor
         if (mon) {
             var scr = Quickshell.screens.find(function (s) { return s.name === mon.name })
             if (scr) root.screen = scr

@@ -60,7 +60,7 @@ Item {
 
             Text {
                 text: "AUDIO"; color: Theme.text
-                font.family: Theme.fontFamily; font.pixelSize: 19; font.letterSpacing: 3
+                font.family: Theme.fontFamily; font.pixelSize: 23; font.letterSpacing: 3
             }
 
             Rectangle { width: parent.width; height: 1; color: Theme.border }
@@ -76,7 +76,7 @@ Item {
                         anchors.centerIn: parent
                         text: page.muted ? "\uf026" : "\uf028"
                         color: page.muted ? Theme.danger : Theme.accent
-                        font.family: Theme.iconFont; font.pixelSize: 12
+                        font.family: Theme.iconFont; font.pixelSize: 14
                     }
                     MouseArea {
                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -86,7 +86,7 @@ Item {
                 Text {
                     width: 76; anchors.verticalCenter: parent.verticalCenter
                     text: "OUTPUT"; color: Theme.text
-                    font.family: Theme.fontFamily; font.pixelSize: 15; font.letterSpacing: 2
+                    font.family: Theme.fontFamily; font.pixelSize: 18; font.letterSpacing: 2
                 }
                 Slider {
                     width: parent.width - 28 - 76 - 8 - page.sliderMarginRight
@@ -113,13 +113,13 @@ Item {
                             Text {
                                 width: 20; anchors.verticalCenter: parent.verticalCenter
                                 text: active ? "\uf192" : "\uf10c"; color: active ? Theme.accent : Theme.textFaint
-                                font.family: Theme.iconFont; font.pixelSize: 11
+                                font.family: Theme.iconFont; font.pixelSize: 13
                             }
                             Text {
                                 width: parent.width - 28; anchors.verticalCenter: parent.verticalCenter
                                 text: (output?.description || output?.nickname || output?.name || "Unknown output").toUpperCase()
                                 color: active ? Theme.accent : Theme.text
-                                font.family: Theme.fontFamily; font.pixelSize: 10; elide: Text.ElideRight
+                                font.family: Theme.fontFamily; font.pixelSize: 12; elide: Text.ElideRight
                             }
                         }
 
@@ -132,7 +132,7 @@ Item {
                 Text {
                     visible: page.outputSinks.length === 0
                     text: "NO AUDIO OUTPUTS"; color: Theme.textFaint; leftPadding: 4
-                    font.family: Theme.fontFamily; font.pixelSize: 10; font.letterSpacing: 1.5
+                    font.family: Theme.fontFamily; font.pixelSize: 12; font.letterSpacing: 1.5
                 }
             }
 
@@ -147,7 +147,7 @@ Item {
                         anchors.centerIn: parent
                         text: page.inputMuted ? "\uf131" : "\uf130"
                         color: page.inputMuted ? Theme.danger : Theme.accent
-                        font.family: Theme.iconFont; font.pixelSize: 12
+                        font.family: Theme.iconFont; font.pixelSize: 14
                     }
                     MouseArea {
                         anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -157,7 +157,7 @@ Item {
                 Text {
                     width: 76; anchors.verticalCenter: parent.verticalCenter
                     text: "INPUT"; color: Theme.text
-                    font.family: Theme.fontFamily; font.pixelSize: 15; font.letterSpacing: 2
+                    font.family: Theme.fontFamily; font.pixelSize: 18; font.letterSpacing: 2
                 }
                 Slider {
                     width: parent.width - 28 - 76 - 8 - page.sliderMarginRight
@@ -184,13 +184,13 @@ Item {
                             Text {
                                 width: 20; anchors.verticalCenter: parent.verticalCenter
                                 text: active ? "\uf192" : "\uf10c"; color: active ? Theme.accent : Theme.textFaint
-                                font.family: Theme.iconFont; font.pixelSize: 11
+                                font.family: Theme.iconFont; font.pixelSize: 13
                             }
                             Text {
                                 width: parent.width - 28; anchors.verticalCenter: parent.verticalCenter
                                 text: (input?.description || input?.nickname || input?.name || "Unknown input").toUpperCase()
                                 color: active ? Theme.accent : Theme.text
-                                font.family: Theme.fontFamily; font.pixelSize: 10; elide: Text.ElideRight
+                                font.family: Theme.fontFamily; font.pixelSize: 12; elide: Text.ElideRight
                             }
                         }
 
@@ -203,7 +203,7 @@ Item {
                 Text {
                     visible: page.inputSources.length === 0
                     text: "NO AUDIO INPUTS"; color: Theme.textFaint; leftPadding: 4
-                    font.family: Theme.fontFamily; font.pixelSize: 10; font.letterSpacing: 1.5
+                    font.family: Theme.fontFamily; font.pixelSize: 12; font.letterSpacing: 1.5
                 }
             }
 
@@ -214,12 +214,12 @@ Item {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "PER-APP VOLUME"; color: Theme.text
-                    font.family: Theme.fontFamily; font.pixelSize: 14; font.letterSpacing: 2
+                    font.family: Theme.fontFamily; font.pixelSize: 17; font.letterSpacing: 2
                 }
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: page.appStreams.length; color: Theme.textFaint
-                    font.family: Theme.fontFamily; font.pixelSize: 10
+                    font.family: Theme.fontFamily; font.pixelSize: 12
                 }
             }
 
@@ -247,7 +247,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: streamMuted ? "\uf026" : "\uf028"
                                     color: streamMuted ? Theme.danger : Theme.accent
-                                    font.family: Theme.iconFont; font.pixelSize: 12
+                                    font.family: Theme.iconFont; font.pixelSize: 14
                                 }
                                 MouseArea {
                                     anchors.fill: parent; cursorShape: Qt.PointingHandCursor
@@ -258,7 +258,7 @@ Item {
                                 width: 82; anchors.verticalCenter: parent.verticalCenter
                                 text: (stream?.description || stream?.name || "Unknown app").toUpperCase()
                                 color: streamMuted ? Theme.textDim : Theme.text
-                                font.family: Theme.fontFamily; font.pixelSize: 11; elide: Text.ElideRight
+                                font.family: Theme.fontFamily; font.pixelSize: 13; elide: Text.ElideRight
                             }
                             Slider {
                                 width: parent.width - 28 - 82 - 12 - page.sliderMarginRight
@@ -272,7 +272,7 @@ Item {
                 Text {
                     visible: page.appStreams.length === 0
                     text: "NO ACTIVE AUDIO STREAMS"; color: Theme.textDim; leftPadding: 4
-                    font.family: Theme.fontFamily; font.pixelSize: 10; font.letterSpacing: 1.5
+                    font.family: Theme.fontFamily; font.pixelSize: 12; font.letterSpacing: 1.5
                 }
             }
         }

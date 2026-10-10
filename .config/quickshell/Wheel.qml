@@ -4,7 +4,6 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
-import Quickshell.Hyprland
 
 PanelWindow {
     id: root
@@ -26,7 +25,7 @@ PanelWindow {
         { icon: "\uf03e", name: "Wallpaper", cmd: ["sh", "-c", "qs -n -p ~/.config/quickshell/hyprquickpaper"] },
         { icon: "\uf0f3", name: "Notifs",    cmd: ["qs", "ipc", "call", "notifications", "toggle"] },
         { icon: "\uf0ae", name: "To-do",     cmd: ["qs", "ipc", "call", "todo", "toggle"] },
-        { icon: "\udb80\udd68", name: "Opacity",   cmd: ["sh", "-c", "$HOME/.config/hypr/scripts/opacity.sh"] }
+        { icon: "\udb80\udd68", name: "Opacity",   cmd: ["sh", "-c", "$HOME/.config/mango/scripts/opacity.sh"] }
     ]
 
     anchors { top: true; bottom: true; left: true; right: true }
@@ -46,7 +45,7 @@ PanelWindow {
     }
 
     function openMenu() {
-        var mon = Hyprland.focusedMonitor
+        var mon = Mango.focusedMonitor
         if (mon) {
             var scr = Quickshell.screens.find(function (s) { return s.name === mon.name })
             if (scr) root.screen = scr
