@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Mango (D-Bus)
+Comment=MangoWC with a single D-Bus session bus shared by the whole session
+# Without dbus-run-session every autostarted app autolaunches its own private
+# session bus, so tray icons, notifications and the keyring never meet.
+Exec=dbus-run-session mango
+Type=Application
+DesktopNames=mango

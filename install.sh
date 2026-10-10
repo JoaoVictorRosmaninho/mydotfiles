@@ -175,6 +175,26 @@ for entry in "${SERVICES[@]}"; do
 done
 
 # --------------------------------------------------
+# Login session with a single D-Bus session bus
+# --------------------------------------------------
+#
+# Greeters start `mango` without a session bus, so every autostarted app
+# autolaunches a private one (tray icons, notifications and the keyring then
+# never see each other). "Mango (D-Bus)" runs `dbus-run-session mango`.
+# Separate file name, so mangowc package updates never overwrite it.
+
+SESSION_SRC="$REPO_DIR/system/wayland-sessions/mango-dbus.desktop"
+SESSION_DST="/usr/share/wayland-sessions/mango-dbus.desktop"
+if [[ -f "$SESSION_SRC" ]] && ! cmp -s "$SESSION_SRC" "$SESSION_DST" 2>/dev/null; then
+    info "Installing the 'Mango (D-Bus)' login session..."
+    if sudo install -Dm644 "$SESSION_SRC" "$SESSION_DST"; then
+        success "Session installed: pick 'Mango (D-Bus)' in the greeter."
+    else
+        warning "Failed to install $SESSION_DST"
+    fi
+fi
+
+# --------------------------------------------------
 # Link dotfiles (symlinked — the repo is the only copy)
 # --------------------------------------------------
 
@@ -303,5 +323,5 @@ if [[ "${#UNKNOWN_PACKAGES[@]}" -gt 0 ]]; then
     warning "Unresolved packages (install manually): ${UNKNOWN_PACKAGES[*]}"
 fi
 
-warning "Log out and back into mango for the changes to fully take effect."
+warning "Log out and back in choosing the 'Mango (D-Bus)' session for the changes to fully take effect."
 success "Installation complete!"

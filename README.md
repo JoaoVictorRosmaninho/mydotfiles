@@ -178,7 +178,7 @@ Se você adicionar um arquivo novo ao repo, rode `./update.sh` para criar o syml
 | --- | --- |
 | `config.conf` | Arquivo principal: variáveis de ambiente, efeitos (blur, sombras, bordas, opacidade), animações, layouts, teclado e trackpad, gaps. No final ele inclui os outros arquivos com `source=`. |
 | `autostart.conf` | Programas iniciados com a sessão: keyring, syncthingtray, agente de polkit (`polkit-gnome`), `nm-applet`, histórico de clipboard (`cliphist`) e a chamada do `autostart.sh`. |
-| `autostart.sh` | Inicialização que precisa de ordem: exporta o ambiente para o D-Bus, reinicia os portais, sobe o PipeWire (o Void não tem units de usuário), reaplica o layout de monitores salvo, inicia o `awww-daemon` (wallpaper) e o Quickshell (`qs`, com log em `~/.cache/quickshell.log`). |
+| `autostart.sh` | Inicialização que precisa de ordem: avisa se a sessão não tem D-Bus, exporta o ambiente para o D-Bus, inicia os portais e o PipeWire (o Void não tem units de usuário) se ainda não estiverem rodando, reaplica o layout de monitores salvo, inicia o `awww-daemon` (wallpaper) e o Quickshell (`qs`, com log em `~/.cache/quickshell.log`). |
 | `binds.conf` | Todos os atalhos: os seus originais mais os do shell (bloco "Quickshell" no final). |
 | `rules.conf` | Regras de janela (`windowrule`) e de layer (`layerrule`), por exemplo a animação do rofi. |
 | `colors.conf` | **Gerado** pelo tema. Cores das bordas e do fundo. |
@@ -193,7 +193,7 @@ Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/man
 | --- | --- |
 | `shell.qml` | Ponto de entrada: instancia todos os componentes abaixo. |
 | `Mango.qml` | **Novo.** Integração com o mango. Roda `mmsg watch all-monitors` e expõe `monitors`, `focusedMonitor`, `activeClient`, `tagsFor(monitor)`, `viewTag()` e `dispatch()`. Substitui o `Quickshell.Hyprland` do original. |
-| `Bar.qml` | Barra superior: módulos, estilos, calendar popup e painel de customização (botão direito no relógio). A fonte é definida em `barFont`, perto do topo. |
+| `Bar.qml` | Barra superior: módulos, estilos, calendar popup e painel de customização (botão direito no relógio). A fonte é definida em `barFont`, perto do topo. O módulo `tray` (componente `trayC`) mostra os ícones da bandeja via `Quickshell.Services.SystemTray`. Clique esquerdo abre o app, o direito abre o menu, o do meio faz a ação secundária. O próprio Quickshell faz o papel de *StatusNotifierWatcher*. |
 | `Lock.qml` | **Novo.** Tela de bloqueio (substitui o hyprlock). Wallpaper desfocado, relógio, campo de senha e música tocando. Autentica via PAM em `/etc/pam.d/system-auth`. |
 | `Notifications.qml` | Servidor de notificações (substitui o swaync), popups e central de notificações. |
 | `PowerMenu.qml` | Menu de energia: bloquear, desligar, reiniciar, suspender (`loginctl`), sair (`mmsg dispatch quit`), hibernar. |
@@ -217,6 +217,14 @@ Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/man
 | `templates/` | Templates com `{{cor}}` / `{{cor\|hex8=ff}}`. `mango-colors.conf` e `alacritty-colors.toml` são novos. |
 | `themes/*.toml` | Temas prontos (nord, tokyo-night, catppuccin...). |
 
+#### `system/`: arquivos fora do `~/.config`
+
+| Arquivo | Propósito |
+| --- | --- |
+| `wayland-sessions/mango-dbus.desktop` | Entrada **"Mango (D-Bus)"** no greeter: `Exec=dbus-run-session mango`. O `install.sh` copia para `/usr/share/wayland-sessions/`. |
+
+**Por que essa sessão existe:** a entrada padrão do pacote (`Exec=mango`) inicia o compositor sem um barramento D-Bus de sessão. Cada programa do autostart (`nm-applet`, `syncthingtray`, keyring, polkit...) então faz *autolaunch* do próprio barramento privado. Os ícones de tray, as notificações e o keyring ficam em barramentos diferentes e nunca se encontram. Era esse o problema de "a waybar não encontra o endereço do dbus". Com `dbus-run-session`, a sessão inteira compartilha um único barramento.
+
 #### Outros
 
 | Arquivo | Propósito |
@@ -235,6 +243,7 @@ Esses ajustes foram feitos direto no sistema e não são versionados:
 | Onde | O quê | Como desfazer |
 | --- | --- | --- |
 | `~/.config/alacritty/alacritty.toml` | Bloco `[general]` no topo com `import = ["~/.config/alacritty/colors.toml"]` | Remover o bloco |
+| `/usr/share/wayland-sessions/mango-dbus.desktop` | Sessão "Mango (D-Bus)" no greeter | `sudo rm` o arquivo |
 | `~/.local/share/dbus-1/services/org.erikreider.swaync.service` | Impede que o D-Bus reative o swaync, que roubaria as notificações do Quickshell | Apagar o arquivo |
 | `/var/service/` (runit) | `NetworkManager` e `power-profiles-daemon` ativados, `dhcpcd` desativado | `sudo rm /var/service/NetworkManager && sudo ln -s /etc/sv/dhcpcd /var/service/` |
 | `~/.config/quickshell/state/` | Estado salvo da barra (`bar-state.json`), das janelas e do layout de monitores (`display.sh`) | Apagar o arquivo volta ao padrão |
@@ -257,6 +266,8 @@ Esses ajustes foram feitos direto no sistema e não são versionados:
 - **Reiniciar o shell:** `qs kill; setsid qs >~/.cache/quickshell.log 2>&1 &`.
 - **Testar o QML direto do repo:** `qs -p ~/dotfiles/.config/quickshell`.
 - **Validar a config do mango:** `mango -p`. Os erros `ov_tab_mode`, `disable_while_typing`, `left_handed` e `middle_button_emulation`, e os conflitos de `Super+N` / `Alt+Shift+Setas`, já existiam antes da migração.
+- **D-Bus da sessão:** `pgrep -a dbus-daemon | grep -c -- --session` deve dar **1** (fora o do at-spi, que tem `--config-file`). Se der mais, você entrou pela sessão "Mango" comum em vez de "Mango (D-Bus)". Também dá para comparar o barramento de dois processos com `tr '\0' '\n' < /proc/$(pgrep -xo qs)/environ | grep DBUS`.
+- **Ícone faltando no tray:** o app precisa suportar StatusNotifierItem (AppIndicator). O `nm-applet` precisa do `--indicator`. Apps que só implementam o tray antigo do X11 (XEmbed) não aparecem.
 - **Quem é o servidor de notificações:** `dbus-send --session --print-reply --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.GetServerInformation`. Deve responder "quickshell".
 - **Chamar o shell pela linha de comando:** `qs ipc show` lista os alvos. Ex.: `qs ipc call settings toggle`, `qs ipc call lock lock`.
 

@@ -5,6 +5,8 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
+import Quickshell.Services.SystemTray
+import Quickshell.Widgets
 
 Scope {
     id: root
@@ -35,9 +37,10 @@ Scope {
             property bool showNotif: true
             property bool showWall: true
             property bool showTitle: true
+            property bool showTray: true
             property string startMods: "ws,title"
             property string centerMods: "clock"
-            property string endMods: "media,stats,volume,battery,net,notif,wall,power"
+            property string endMods: "media,stats,tray,volume,battery,net,notif,wall,power"
         }
     }
 
@@ -52,10 +55,10 @@ Scope {
         cfg.scale = 1.0; cfg.bgOpacity = 0.85; cfg.border = true;
         cfg.showStats = false; cfg.showWs = true; cfg.showMedia = true;
         cfg.showVolume = true; cfg.showBattery = true; cfg.showNet = true;
-        cfg.showNotif = true; cfg.showWall = true; cfg.showTitle = true;
+        cfg.showNotif = true; cfg.showWall = true; cfg.showTitle = true; cfg.showTray = true;
         cfg.startMods = "ws,title";
         cfg.centerMods = "clock";
-        cfg.endMods = "media,stats,volume,battery,net,notif,wall,power";
+        cfg.endMods = "media,stats,tray,volume,battery,net,notif,wall,power";
     }
 
     readonly property bool vertical: cfg.position === "left" || cfg.position === "right"
@@ -107,12 +110,13 @@ Scope {
     readonly property var batIcons: ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"]
     readonly property string batIcon: batIcons[batPct >= 90 ? 4 : batPct >= 65 ? 3 : batPct >= 40 ? 2 : batPct >= 15 ? 1 : 0]
 
-    readonly property var moduleIds: ["stats", "ws", "title", "media", "volume", "battery", "net", "notif", "wall", "power"]
+    readonly property var moduleIds: ["stats", "ws", "title", "media", "tray", "volume", "battery", "net", "notif", "wall", "power"]
     readonly property var moduleDefs: [
         { id: "stats", l: "CPU / RAM (x)", k: "showStats" },
         { id: "ws", l: "Tags", k: "showWs" },
         { id: "title", l: "Window title", k: "showTitle" },
         { id: "media", l: "Media", k: "showMedia" },
+        { id: "tray", l: "System tray", k: "showTray" },
         { id: "volume", l: "Volume", k: "showVolume" },
         { id: "battery", l: "Battery", k: "showBattery" },
         { id: "net", l: "Network", k: "showNet" },
@@ -172,6 +176,7 @@ Scope {
         case "stats": return cfg.showStats && !vertical;
         case "ws": return cfg.showWs;
         case "media": return cfg.showMedia && Marquee.player !== null && Marquee.title !== "";
+        case "tray": return cfg.showTray && SystemTray.items.values.length > 0;
         case "volume": return cfg.showVolume;
         case "battery": return cfg.showBattery && battery !== null;
         case "net": return cfg.showNet;
@@ -187,6 +192,7 @@ Scope {
         case "stats": return statsC;
         case "ws": return wsC;
         case "media": return mediaC;
+        case "tray": return trayC;
         case "volume": return volumeC;
         case "battery": return batteryC;
         case "net": return netC;
@@ -683,6 +689,72 @@ Scope {
                     if (mouse.button === Qt.LeftButton) p.togglePlaying();
                     else if (mouse.button === Qt.RightButton) p.next();
                     else p.previous();
+                }
+            }
+        }
+    }
+
+    // System tray (StatusNotifierItem). Quickshell itself acts as the
+    // StatusNotifierWatcher, so apps only need to share the session bus.
+    // left: activate (or menu for menu-only items), right: menu, middle: secondary
+    Component {
+        id: trayC
+        Item {
+            implicitWidth: root.vertical ? root.panelThick : trayLane.implicitWidth + 12
+            implicitHeight: root.vertical ? trayLane.implicitHeight + 12 : root.panelThick - 2
+
+            Lane {
+                id: trayLane
+                anchors.centerIn: parent
+                gap: 2
+
+                Repeater {
+                    model: SystemTray.items
+
+                    delegate: Item {
+                        id: ti
+                        required property SystemTrayItem modelData
+                        readonly property int box: root.panelThick - 8
+                        Layout.alignment: Qt.AlignCenter
+                        implicitWidth: box
+                        implicitHeight: box
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: height / 2
+                            color: Qt.alpha(Theme.accent, tiMa.pressed ? 0.22 : 0.12)
+                            opacity: tiMa.containsMouse ? 1 : 0
+                            Behavior on opacity { NumberAnimation { duration: Theme.animFast } }
+                        }
+
+                        IconImage {
+                            anchors.centerIn: parent
+                            implicitSize: root.s(16)
+                            source: ti.modelData.icon
+                            asynchronous: true
+                        }
+
+                        function openMenu() {
+                            if (!modelData.hasMenu) return;
+                            const below = cfg.position !== "bottom";
+                            const p = ti.mapToItem(null, 0, below ? ti.height + 6 : -6);
+                            modelData.display(ti.QsWindow.window, p.x, p.y);
+                        }
+
+                        MouseArea {
+                            id: tiMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                            onClicked: mouse => {
+                                const it = ti.modelData;
+                                if (mouse.button === Qt.MiddleButton) it.secondaryActivate();
+                                else if (mouse.button === Qt.RightButton || it.onlyMenu) ti.openMenu();
+                                else it.activate();
+                            }
+                            onWheel: wheel => ti.modelData.scroll(wheel.angleDelta.y / 120, false)
+                        }
+                    }
                 }
             }
         }

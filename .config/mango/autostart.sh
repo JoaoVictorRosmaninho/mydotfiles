@@ -1,27 +1,33 @@
 #!/bin/sh
 # ~/.config/mango/autostart.sh — started once by autostart.conf
+#
+# The session must be started with `dbus-run-session mango` (the "Mango (D-Bus)"
+# entry in the greeter, see system/wayland-sessions/). Every process then shares
+# one session bus, which tray icons, notifications and the keyring depend on.
 
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
-    eval "$(dbus-launch --sh-syntax --exit-with-session)"
+    echo "autostart.sh: no D-Bus session bus; log in with the 'Mango (D-Bus)' session" >&2
+    command -v notify-send >/dev/null && (sleep 5; notify-send -u critical "Sem D-Bus de sessão" \
+        "Faça login pela sessão 'Mango (D-Bus)' — tray, notificações e keyring dependem dela.") &
 fi
 
-# 1. Export the session environment to D-Bus activated services
+# 1. Export the compositor environment to D-Bus activated services (portals, ...)
 dbus-update-activation-environment --all
-dbus-update-activation-environment DBUS_SESSION_BUS_ADDRESS WAYLAND_DISPLAY XDG_CURRENT_DESKTOP MANGO_INSTANCE_SIGNATURE
 
-# 2. Restart portals so they pick up the bus above
-killall -9 xdg-desktop-portal xdg-desktop-portal-wlr 2>/dev/null
-/usr/libexec/xdg-desktop-portal-wlr &
+# 2. Portals (not D-Bus activated reliably on Void without systemd)
+# (pgrep -x only sees the first 15 chars of a process name, hence -f)
+pgrep -f '^/usr/libexec/xdg-desktop-portal-wlr' >/dev/null || /usr/libexec/xdg-desktop-portal-wlr &
 sleep 1
-/usr/libexec/xdg-desktop-portal &
+pgrep -f '^/usr/libexec/xdg-desktop-portal$' >/dev/null || /usr/libexec/xdg-desktop-portal &
 
 # 3. Audio (no systemd user units on Void): wireplumber must start last
-killall -9 pipewire wireplumber pipewire-pulse 2>/dev/null
-pipewire &
-sleep 1
-pipewire-pulse &
-sleep 1
-wireplumber &
+if ! pgrep -x pipewire >/dev/null; then
+    pipewire &
+    sleep 1
+    pipewire-pulse &
+    sleep 1
+    wireplumber &
+fi
 
 # 4. Saved monitor layout from Settings > Display
 [ -x "$HOME/.config/quickshell/state/display.sh" ] && sh "$HOME/.config/quickshell/state/display.sh"
@@ -29,10 +35,5 @@ wireplumber &
 # 5. Wallpaper daemon (restores the last wallpaper by itself)
 pgrep -x awww-daemon >/dev/null || awww-daemon &
 
-# 6. Quickshell: bar, notifications, OSDs, menus, lock screen.
-#    Only one notification daemon can own the bus, so make sure the old ones are gone.
-pkill -x waybar 2>/dev/null
-pkill -x swaync 2>/dev/null
-pkill -x qs 2>/dev/null
-sleep 1
-qs >"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell.log" 2>&1 &
+# 6. Quickshell: bar (with system tray), notifications, OSDs, menus, lock screen
+pgrep -x qs >/dev/null || qs >"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell.log" 2>&1 &
