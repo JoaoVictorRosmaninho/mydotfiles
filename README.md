@@ -146,3 +146,124 @@ You can check the reminders printed at the end of the run.
 
 
 
+
+---
+
+## Guia de manutenção (port MangoWC / Void)
+
+Este guia descreve o que foi alterado em relação ao setup original de Hyprland, onde fica cada coisa e como editar manualmente sem quebrar nada.
+
+### Como os arquivos chegam em `~/.config`
+
+O `install.sh` cria **symlinks** de cada arquivo de `~/dotfiles/.config/` para `~/.config/`. Editar qualquer um dos dois caminhos edita o mesmo arquivo. As exceções são os **arquivos gerados**, que são *copiados* uma vez e depois reescritos pelo gerador de tema. Editar esses arquivos à mão não adianta, porque a próxima troca de tema sobrescreve:
+
+| Arquivo gerado (em `~/.config`) | Gerado a partir de |
+| --- | --- |
+| `mango/colors.conf` | `43pr/templates/mango-colors.conf` |
+| `alacritty/colors.toml` | `43pr/templates/alacritty-colors.toml` |
+| `rofi/colors.rasi` | `43pr/templates/rofi-colors.rasi` |
+| `gtk-3.0/colors.css`, `gtk-4.0/colors.css` | `43pr/templates/gtk-colors.css` |
+| `kitty/matugen.conf` | `43pr/templates/kitty.conf` |
+| `~/.cache/43pr/quickshell-theme.json` | `43pr/templates/quickshell-theme.json` (cores lidas pelo `Theme.qml`) |
+
+`quickshell/Theme.qml` também é **copiado**, não linkado, porque o script de opacidade edita a cópia em `~/.config`. Para mudar fontes ou tamanhos globais do shell, edite `~/.config/quickshell/Theme.qml`. Para valer numa instalação nova, edite o do repo.
+
+Se você adicionar um arquivo novo ao repo, rode `./update.sh` para criar o symlink.
+
+### Mapa do repositório
+
+#### `.config/mango/`: compositor
+
+| Arquivo | Propósito |
+| --- | --- |
+| `config.conf` | Arquivo principal: variáveis de ambiente, efeitos (blur, sombras, bordas, opacidade), animações, layouts, teclado e trackpad, gaps. No final ele inclui os outros arquivos com `source=`. |
+| `autostart.conf` | Programas iniciados com a sessão: keyring, syncthingtray, agente de polkit (`polkit-gnome`), `nm-applet`, histórico de clipboard (`cliphist`) e a chamada do `autostart.sh`. |
+| `autostart.sh` | Inicialização que precisa de ordem: exporta o ambiente para o D-Bus, reinicia os portais, sobe o PipeWire (o Void não tem units de usuário), reaplica o layout de monitores salvo, inicia o `awww-daemon` (wallpaper) e o Quickshell (`qs`, com log em `~/.cache/quickshell.log`). |
+| `binds.conf` | Todos os atalhos: os seus originais mais os do shell (bloco "Quickshell" no final). |
+| `rules.conf` | Regras de janela (`windowrule`) e de layer (`layerrule`), por exemplo a animação do rofi. |
+| `colors.conf` | **Gerado** pelo tema. Cores das bordas e do fundo. |
+| `local.conf` | Opcional e **fora do git**: ajustes só desta máquina (monitores etc.). Carregado por `source-optional`. |
+| `scripts/opacity.sh` | Menu de opacidade (`Super+Shift+O`): edita `focused_opacity`/`unfocused_opacity` no `config.conf`, o `bgAlpha` do `Theme.qml` e o fundo do rofi, e recarrega o mango. |
+
+Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/mango`.
+
+#### `.config/quickshell/`: barra, notificações, menus e lock
+
+| Arquivo | Propósito |
+| --- | --- |
+| `shell.qml` | Ponto de entrada: instancia todos os componentes abaixo. |
+| `Mango.qml` | **Novo.** Integração com o mango. Roda `mmsg watch all-monitors` e expõe `monitors`, `focusedMonitor`, `activeClient`, `tagsFor(monitor)`, `viewTag()` e `dispatch()`. Substitui o `Quickshell.Hyprland` do original. |
+| `Bar.qml` | Barra superior: módulos, estilos, calendar popup e painel de customização (botão direito no relógio). A fonte é definida em `barFont`, perto do topo. |
+| `Lock.qml` | **Novo.** Tela de bloqueio (substitui o hyprlock). Wallpaper desfocado, relógio, campo de senha e música tocando. Autentica via PAM em `/etc/pam.d/system-auth`. |
+| `Notifications.qml` | Servidor de notificações (substitui o swaync), popups e central de notificações. |
+| `PowerMenu.qml` | Menu de energia: bloquear, desligar, reiniciar, suspender (`loginctl`), sair (`mmsg dispatch quit`), hibernar. |
+| `SettingsWindow.qml` | Janela de configurações (`Super+A`). Tamanho, posição (snap), fundo e barra lateral. |
+| `SettingsPages/*.qml` | Páginas da janela: System, Audio, Display (via `wlr-randr`), Network (via `nmcli`), Bluetooth, Storage (limpeza do cache do xbps), Power (`powerprofilesctl`), Configs (abre os arquivos no gedit), Themes. |
+| `PerspectivePanel.qml` | Container com a animação de abrir/fechar da janela de Settings. `followMouse: false` desliga a inclinação que segue o mouse. |
+| `Todo.qml` | Notas / to-do (`Super+D`). |
+| `Wheel.qml` | Menu radial de atalhos (`Super+Z`). |
+| `VolumeOsd.qml`, `ScreenshotOsd.qml` | Indicadores de volume e preview do screenshot. |
+| `Marquee.qml`, `Slider.qml`, `BluetoothState.qml` | Componentes auxiliares: texto rolante da mídia (MPRIS), slider, estado do bluetooth. |
+| `Theme.qml` | Cores (lidas de `~/.cache/43pr/quickshell-theme.json`), fontes padrão, raio e duração das animações. **Copiado**, não linkado (veja acima). |
+| `hyprquickpaper/` | Seletor de wallpaper (`Super+W`). `config.json` define a pasta (`~/Pictures/Wallpapers/`). `commands.sh` aplica o wallpaper com `awww` e chama o gerador de tema. |
+| `imgs/` | Ícones do power menu e foto da página System. |
+
+#### `.config/43pr/`: gerador de tema
+
+| Arquivo | Propósito |
+| --- | --- |
+| `bin/theme.py` | Gera as cores e escreve os templates. Comandos: `wallpaper <img>`, `preset <nome>`, `default`, `toggle` (claro/escuro), `apply` (re-renderiza), `list`, `status`. |
+| `targets.toml` | Lista de "template → arquivo de saída → comando de reload". Os alvos `mango` e `alacritty` foram adicionados; o `hyprlock` foi removido. |
+| `templates/` | Templates com `{{cor}}` / `{{cor\|hex8=ff}}`. `mango-colors.conf` e `alacritty-colors.toml` são novos. |
+| `themes/*.toml` | Temas prontos (nord, tokyo-night, catppuccin...). |
+
+#### Outros
+
+| Arquivo | Propósito |
+| --- | --- |
+| `.config/starship.toml` | Prompt do fish (o seu antigo: AWS, git, linguagens, hora) com `command_timeout = 1500`. |
+| `.config/rofi/config.rasi` | Launcher e clipboard (`Super+P`, `Super+V`). O terminal é o alacritty. |
+| `.config/alacritty/colors.toml` | Versão inicial das cores geradas (copiada uma vez). |
+| `install.sh` | Instalação no Void: `xbps-install -Su` completo, pacotes do `packages.txt`, serviços do runit, symlinks, import de cores no alacritty, tema inicial. `--skip-packages` pula os pacotes. |
+| `update.sh` | Após um `git pull`: instala pacotes novos, linka arquivos novos e regenera o tema. `--dry-run`, `--skip-packages`, `--skip-theme`, `--restart-shell`. |
+| `packages.txt` | Pacotes do Void (nomes do xbps). |
+
+### O que foi alterado fora do repositório
+
+Esses ajustes foram feitos direto no sistema e não são versionados:
+
+| Onde | O quê | Como desfazer |
+| --- | --- | --- |
+| `~/.config/alacritty/alacritty.toml` | Bloco `[general]` no topo com `import = ["~/.config/alacritty/colors.toml"]` | Remover o bloco |
+| `~/.local/share/dbus-1/services/org.erikreider.swaync.service` | Impede que o D-Bus reative o swaync, que roubaria as notificações do Quickshell | Apagar o arquivo |
+| `/var/service/` (runit) | `NetworkManager` e `power-profiles-daemon` ativados, `dhcpcd` desativado | `sudo rm /var/service/NetworkManager && sudo ln -s /etc/sv/dhcpcd /var/service/` |
+| `~/.config/quickshell/state/` | Estado salvo da barra (`bar-state.json`), das janelas e do layout de monitores (`display.sh`) | Apagar o arquivo volta ao padrão |
+| `~/.local/state/43pr/state.json` | Tema e wallpaper atuais | — |
+| `~/.config-backups/<data>/` | Backups das configs substituídas (waybar, swaync, mango antigo...) | Copiar de volta |
+
+### Tarefas comuns
+
+- **Mudar ou adicionar um atalho:** edite `~/.config/mango/binds.conf`. Formato: `bind=MODS,tecla,função,argumento`. Use `spawn` para comandos simples (o `~` é expandido) e `spawn_shell` para comandos com pipe, `&&` ou `$(...)`. Valide com `mango -p` e aplique com `Super+R` (ou `mmsg dispatch reload_config`).
+- **Configurar monitores de forma fixa:** crie `~/.config/mango/local.conf`, ou use Settings → Display, que salva em `~/.config/quickshell/state/display.sh` e é reaplicado no login.
+- **Trocar a fonte da barra:** em `Bar.qml`, mude `readonly property string barFont`. Para ver as Nerd Fonts instaladas: `fc-list : family | grep -i "nerd font"`.
+- **Tamanho e altura da barra:** botão direito no relógio abre o painel de customização (posição, estilo, espessura, escala, módulos). Os padrões ficam no `JsonAdapter` no topo de `Bar.qml`.
+- **Mudar a cor de alguma coisa:** edite o template em `43pr/templates/` e rode `python3 ~/.config/43pr/bin/theme.py apply`.
+- **Adicionar um programa ao autostart:** linha `exec-once = comando` em `autostart.conf`. Se depender de ordem (D-Bus, áudio), coloque no `autostart.sh`.
+- **Voltar ao waybar + swaync:** apague o override do D-Bus (tabela acima) e troque, no fim do `autostart.sh`, o `qs` por `waybar &` e `swaync &`.
+
+### Depuração
+
+- **Log do Quickshell:** `qs log` (instância atual) ou `~/.cache/quickshell.log`.
+- **Reiniciar o shell:** `qs kill; setsid qs >~/.cache/quickshell.log 2>&1 &`.
+- **Testar o QML direto do repo:** `qs -p ~/dotfiles/.config/quickshell`.
+- **Validar a config do mango:** `mango -p`. Os erros `ov_tab_mode`, `disable_while_typing`, `left_handed` e `middle_button_emulation`, e os conflitos de `Super+N` / `Alt+Shift+Setas`, já existiam antes da migração.
+- **Quem é o servidor de notificações:** `dbus-send --session --print-reply --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.GetServerInformation`. Deve responder "quickshell".
+- **Chamar o shell pela linha de comando:** `qs ipc show` lista os alvos. Ex.: `qs ipc call settings toggle`, `qs ipc call lock lock`.
+
+### Armadilhas conhecidas
+
+- **Hot reload e `sed -i`:** o Quickshell recarrega sozinho quando um `.qml` muda, mas não percebe edições feitas com `sed -i`, porque ele troca o arquivo por trás do symlink. Use um editor normal, ou reinicie o `qs` depois.
+- **`qs ipc call <alvo> show` não chama a função `show`:** a CLI interpreta `show` como o subcomando de listar funções. Use `toggle`, ou funções como `sound` e `network`.
+- **Void não aceita update parcial:** se um `xbps-install` falhar com `unresolvable shlib libQt_6_PRIVATE_API`, rode antes `sudo xbps-install -Su`.
+- **Lock screen e travamentos:** se o Quickshell cair com a tela bloqueada, o mango mantém a sessão bloqueada. A recuperação via TTY está descrita na seção Installation.
+- **Pastas de imagem:** wallpapers e screenshots usam `~/Pictures`, não `~/Imagens`. Para mudar, edite `hyprquickpaper/config.json` e os binds de `Print` em `binds.conf`.
