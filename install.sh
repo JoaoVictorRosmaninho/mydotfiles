@@ -62,6 +62,7 @@ GENERATED_FILES=(
     "rofi/colors.rasi"
     "quickshell/Theme.qml"
     "fish/fish_variables"
+    "flameshot/flameshot.ini"
 )
 
 # Not linked: this setup keeps fish as the login shell.

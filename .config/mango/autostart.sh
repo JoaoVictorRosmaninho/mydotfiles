@@ -14,20 +14,23 @@ fi
 # 1. Export the compositor environment to D-Bus activated services (portals, ...)
 dbus-update-activation-environment --all
 
-# 2. Portals (not D-Bus activated reliably on Void without systemd)
-# (pgrep -x only sees the first 15 chars of a process name, hence -f)
-pgrep -f '^/usr/libexec/xdg-desktop-portal-wlr' >/dev/null || /usr/libexec/xdg-desktop-portal-wlr &
-sleep 1
-pgrep -f '^/usr/libexec/xdg-desktop-portal$' >/dev/null || /usr/libexec/xdg-desktop-portal &
-
-# 3. Audio (no systemd user units on Void): wireplumber must start last
+# 2. Audio (no systemd user units on Void): wireplumber must start last.
+#    Before the portals: xdg-desktop-portal-wlr connects to PipeWire at startup
+#    and exits if it is not up (no screenshots / screen sharing then).
 if ! pgrep -x pipewire >/dev/null; then
     pipewire &
     sleep 1
     pipewire-pulse &
     sleep 1
     wireplumber &
+    sleep 1
 fi
+
+# 3. Portals (not D-Bus activated reliably on Void without systemd)
+# (pgrep -x only sees the first 15 chars of a process name, hence -f)
+pgrep -f '^/usr/libexec/xdg-desktop-portal-wlr' >/dev/null || /usr/libexec/xdg-desktop-portal-wlr &
+sleep 1
+pgrep -f '^/usr/libexec/xdg-desktop-portal$' >/dev/null || /usr/libexec/xdg-desktop-portal &
 
 # 4. Saved monitor layout from Settings > Display
 [ -x "$HOME/.config/quickshell/state/display.sh" ] && sh "$HOME/.config/quickshell/state/display.sh"

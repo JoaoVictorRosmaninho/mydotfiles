@@ -33,6 +33,7 @@ GENERATED_FILES=(
     "rofi/colors.rasi"
     "quickshell/Theme.qml"
     "fish/fish_variables"
+    "flameshot/flameshot.ini"
 )
 
 DRY_RUN=0
