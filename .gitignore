@@ -19,3 +19,10 @@
 .config/gh/hosts.yml
 .config/github-copilot/
 .config/configstore/
+
+# fish plugin files are installed by fisher from .config/fish/fish_plugins
+# (fisher rewrites them, which would replace symlinks with plain files)
+.config/fish/functions/fisher.fish
+.config/fish/completions/fisher.fish
+.config/fish/functions/replay.fish
+.config/fish/completions/replay.fish

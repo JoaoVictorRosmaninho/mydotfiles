@@ -32,6 +32,7 @@ GENERATED_FILES=(
     "gtk-4.0/settings.ini"
     "rofi/colors.rasi"
     "quickshell/Theme.qml"
+    "fish/fish_variables"
 )
 
 DRY_RUN=0
@@ -87,7 +88,9 @@ elif ! command -v xbps-install >/dev/null 2>&1; then
     error "xbps-install was not found. This updater requires Void Linux."
     exit 1
 elif [[ -f "$PACKAGE_FILE" ]]; then
-    mapfile -t PACKAGES < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$PACKAGE_FILE" | grep -v '^[[:space:]]*$')
+    PKG_FILES=("$PACKAGE_FILE")
+    [[ -f "$REPO_DIR/packages-apps.txt" ]] && PKG_FILES+=("$REPO_DIR/packages-apps.txt")
+    mapfile -t PACKAGES < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' "${PKG_FILES[@]}" | grep -v '^[[:space:]]*$' | sort -u)
     MISSING=()
     for pkg in "${PACKAGES[@]}"; do
         xbps-query "$pkg" >/dev/null 2>&1 || MISSING+=("$pkg")

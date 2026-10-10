@@ -90,18 +90,21 @@ Machine-specific settings (monitors, etc.) go in `~/.config/mango/local.conf`, w
 
 **READ ALL**
 
-Works on **Void Linux** (glibc). Void does not support partial upgrades, so the installer runs a full `xbps-install -Su` before installing anything.
+Works on **Void Linux** (glibc, runit). One repository reproduces the whole machine: system files, services, user, packages and dotfiles. The installer is idempotent, so it is safe to re-run.
 
 ```bash
-sudo xbps-install -S git
-git clone <this repo> ~/dotfiles
+# on a fresh Void install, logged in as your user (in the wheel group)
+sudo xbps-install -Sy git
+git clone https://github.com/JoaoVictorRosmaninho/mydotsfiles.git ~/dotfiles
 cd ~/dotfiles
-./install.sh
+./install.sh            # or: --minimal (desktop shell only), --vur (enable the VUR repo)
 ```
 
-Existing configuration files that get replaced are backed up to `~/.config-backups/<date>/`. The installer also enables the runit services the shell needs (`NetworkManager`, replacing `dhcpcd`, and `power-profiles-daemon`).
+Then log out, pick **"Mango (D-Bus)"** in tuigreet (`F3`), and run `./check.sh` inside the session. It should report 0 failures.
 
-After the installation finishes log out and back in to mango. Put wallpapers in `~/Pictures/Wallpapers` and pick one with `Super + W`.
+What `install.sh` does: xbps mirror + nonfree/multilib repos, a full `xbps-install -Syu` (Void does not support partial upgrades), `packages.txt` + `packages-apps.txt`, `system/` files (greetd, login session), runit services, user groups and fish as login shell, symlinks, fish plugins (fisher) and the initial theme. Replaced files are backed up to `~/.config-backups/<date>/`; replaced system files are kept as `<file>.bak-<date>`.
+
+Not automated (do it by hand on a new machine): packages built with `xbps-src` (listed at the end of `packages-apps.txt`), SSH/GPG keys and cloud credentials (never in the repo), and wallpapers (`~/Pictures/Wallpapers`).
 
 > [!important]
 > **Do not move or delete the dotfiles repository after installation.**
@@ -222,6 +225,11 @@ Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/man
 | Arquivo | Propósito |
 | --- | --- |
 | `wayland-sessions/mango-dbus.desktop` | Entrada **"Mango (D-Bus)"** no greeter: `Exec=dbus-run-session mango`. O `install.sh` copia para `/usr/share/wayland-sessions/`. |
+| `greetd/config.toml` | Config do greetd (tuigreet na vt7, `--remember-session`). Vai para `/etc/greetd/config.toml`. |
+| `xbps.d/00-repository-main.conf` | Espelho do repositório principal (fastly). Vai para `/etc/xbps.d/`. |
+| `xbps.d/vur.conf` | Seu repositório **VUR** (pacotes próprios, ex.: `anki-bin`). Só é instalado com `./install.sh --vur`. |
+
+Para mudar um arquivo de sistema: edite em `system/` e rode `./install.sh --skip-packages`. O arquivo antigo fica salvo como `<arquivo>.bak-<data>`. O `check.sh` avisa quando o sistema diverge do repo.
 
 **Por que essa sessão existe:** a entrada padrão do pacote (`Exec=mango`) inicia o compositor sem um barramento D-Bus de sessão. Cada programa do autostart (`nm-applet`, `syncthingtray`, keyring, polkit...) então faz *autolaunch* do próprio barramento privado. Os ícones de tray, as notificações e o keyring ficam em barramentos diferentes e nunca se encontram. Era esse o problema de "a waybar não encontra o endereço do dbus". Com `dbus-run-session`, a sessão inteira compartilha um único barramento.
 
@@ -231,10 +239,16 @@ Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/man
 | --- | --- |
 | `.config/starship.toml` | Prompt do fish (o seu antigo: AWS, git, linguagens, hora) com `command_timeout = 1500`. |
 | `.config/rofi/config.rasi` | Launcher e clipboard (`Super+P`, `Super+V`). O terminal é o alacritty. |
-| `.config/alacritty/colors.toml` | Versão inicial das cores geradas (copiada uma vez). |
-| `install.sh` | Instalação no Void: `xbps-install -Su` completo, pacotes do `packages.txt`, serviços do runit, symlinks, import de cores no alacritty, tema inicial. `--skip-packages` pula os pacotes. |
-| `update.sh` | Após um `git pull`: instala pacotes novos, linka arquivos novos e regenera o tema. `--dry-run`, `--skip-packages`, `--skip-theme`, `--restart-shell`. |
-| `packages.txt` | Pacotes do Void (nomes do xbps). |
+| `.config/alacritty/alacritty.toml` | Config do alacritty (já importa `colors.toml`). `colors.toml` é gerado pelo tema. |
+| `.config/fish/` | Config do fish: `config.fish`, funções (`awsp`, `awswho`, `gc`, `gs`, `ll`...), `conf.d/aws-profile.fish`. Os plugins são declarados em `fish_plugins` e instalados pelo **fisher**: os arquivos dos plugins (`fisher.fish`, `replay.fish`) **não** são versionados, porque o fisher os reescreve. Para adicionar um plugin: `fisher install autor/plugin` e commite o `fish_plugins`. `fish_variables` é copiado uma vez (o fish o reescreve). |
+| `.config/mango/scripts/` | Além do `opacity.sh`: `change_output_device.py` / `change_input_device.py` (escolher saída/entrada de áudio via rofi, `Super+Alt+O` / `Super+Alt+I`), `screenshot.sh` (flameshot, `Super+L`), `screenshot_2.sh` (grim + swappy), `mangowc_move_window_to_next_previus_tag.sh` (`Super+N`; usa a sintaxe antiga do `mmsg` e está quebrado). |
+| `.config/swappy/config` | Editor de screenshot. |
+| `.config/xdg-desktop-portal/mango-portals.conf` | Portais para `XDG_CURRENT_DESKTOP=mango`: `wlr` para compartilhar tela, `gtk` para seletor de arquivos. |
+| `install.sh` | Reproduz a máquina (veja Installation). `--minimal`, `--skip-packages`, `--vur`. Idempotente. |
+| `check.sh` | **Verificação somente leitura**: D-Bus único, notificações, tray, `mango -p`, arquivos e comandos usados nos binds, symlinks, pacotes, serviços, arquivos de sistema, grupos, shell e se o repo está commitado e enviado. O código de saída é o número de falhas. Rode dentro da sessão gráfica. |
+| `update.sh` | Após um `git pull`: instala pacotes novos (dos dois arquivos), linka arquivos novos e regenera o tema. `--dry-run`, `--skip-packages`, `--skip-theme`, `--restart-shell`. |
+| `packages.txt` | Pacotes do **shell** (mango, quickshell, portais, áudio, fontes...). |
+| `packages-apps.txt` | Seus **programas** (sistema base, apps, CLI, desenvolvimento, GPU AMD...). No final estão os que não existem nos repositórios oficiais e precisam ser compilados com `xbps-src`. Ao instalar algo novo que deve fazer parte da máquina, adicione aqui. |
 
 ### O que foi alterado fora do repositório
 
@@ -242,13 +256,27 @@ Esses ajustes foram feitos direto no sistema e não são versionados:
 
 | Onde | O quê | Como desfazer |
 | --- | --- | --- |
-| `~/.config/alacritty/alacritty.toml` | Bloco `[general]` no topo com `import = ["~/.config/alacritty/colors.toml"]` | Remover o bloco |
-| `/usr/share/wayland-sessions/mango-dbus.desktop` | Sessão "Mango (D-Bus)" no greeter | `sudo rm` o arquivo |
+| `/usr/share/wayland-sessions/mango-dbus.desktop`, `/etc/greetd/config.toml`, `/etc/xbps.d/*` | Cópias de `system/` (versionadas; o `install.sh` reinstala) | Restaurar o `.bak-<data>` |
 | `~/.local/share/dbus-1/services/org.erikreider.swaync.service` | Impede que o D-Bus reative o swaync, que roubaria as notificações do Quickshell | Apagar o arquivo |
 | `/var/service/` (runit) | `NetworkManager` e `power-profiles-daemon` ativados, `dhcpcd` desativado | `sudo rm /var/service/NetworkManager && sudo ln -s /etc/sv/dhcpcd /var/service/` |
 | `~/.config/quickshell/state/` | Estado salvo da barra (`bar-state.json`), das janelas e do layout de monitores (`display.sh`) | Apagar o arquivo volta ao padrão |
 | `~/.local/state/43pr/state.json` | Tema e wallpaper atuais | — |
-| `~/.config-backups/<data>/` | Backups das configs substituídas (waybar, swaync, mango antigo...) | Copiar de volta |
+| `~/.config-backups/<data>/` | Backups das configs substituídas (waybar, swaync, mango antigo...). Inclui `*-config-git/.git`, o antigo repositório de dentro do `~/.config`, cujo histórico foi incorporado a este repo | Copiar de volta |
+
+### Fluxo do dia a dia
+
+O repositório é a fonte da verdade. Como quase tudo em `~/.config` é symlink, editar `~/.config/mango/binds.conf` edita o arquivo do repo. Depois de qualquer mudança:
+
+```bash
+cd ~/dotfiles
+./check.sh          # nada quebrou?
+git add -A && git commit -m "..." && git push
+```
+
+- **Config nova** (de um app que ainda não está no repo): mova a pasta para `~/dotfiles/.config/<app>/` e rode `./install.sh --skip-packages`, que cria os symlinks.
+- **Pacote novo** que deve fazer parte da máquina: adicione em `packages-apps.txt` (ou em `packages.txt`, se for do shell).
+- **Serviço novo:** adicione em `SERVICES_APPS` no `install.sh`. O `check.sh` lê a mesma lista.
+- **Nunca** coloque credenciais no repo (ele é **público**). O `.gitignore` bloqueia os casos conhecidos (`*_accessKeys.csv`, `.ssh`, `.aws`, `.env`...).
 
 ### Tarefas comuns
 

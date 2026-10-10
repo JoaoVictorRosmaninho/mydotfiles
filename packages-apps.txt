@@ -1,0 +1,202 @@
+# Personal applications (on top of packages.txt, which is the desktop shell).
+# Installed by `./install.sh` unless `--minimal` is given.
+# Generated from `xbps-query -m` on 2026-10-10 and grouped by hand.
+# Names that cannot be resolved in the configured repos are skipped with a warning.
+
+# --------------------------------------------------
+# Base system / boot / snapshots
+# --------------------------------------------------
+
+base-system
+base-devel
+grub-x86_64-efi
+grub-btrfs
+grub-btrfs-runit
+snapper
+timeshift
+socklog-void
+cronie
+smartmontools
+void-docs
+xmirror
+xtools
+vsv
+
+# --------------------------------------------------
+# Session / login / desktop plumbing
+# --------------------------------------------------
+
+greetd
+tuigreet
+elogind
+dbus-elogind
+seatd
+turnstile
+gnome-keyring
+seahorse
+udisks2
+udiskie
+gvfs
+gvfs-mtp
+tumbler
+ffmpegthumbnailer
+notify-send.sh
+xorg
+qt5-wayland
+oxygen-icons
+noto-fonts-ttf
+noto-fonts-emoji
+font-libre-hebrew
+
+# --------------------------------------------------
+# Graphics / GPU (AMD)
+# --------------------------------------------------
+
+mesa-dri
+mesa-vaapi
+mesa-vulkan-radeon
+amdvlk
+radeontop
+ROCm-SMI
+
+# 32-bit (Steam) — needs void-repo-multilib
+void-repo-multilib
+glibc-32bit
+libgcc-32bit
+libstdc++-32bit
+libdrm-32bit
+libglvnd-32bit
+mesa-32bit
+mesa-dri-32bit
+
+# --------------------------------------------------
+# Audio / media
+# --------------------------------------------------
+
+alsa-utils
+gst-plugins-good1
+ffmpeg
+libavcodec
+libavformat
+libavutil
+libswscale
+mpv
+feh
+flameshot
+swappy
+wf-recorder
+youtube-dl
+stremio-shell
+
+# --------------------------------------------------
+# Apps
+# --------------------------------------------------
+
+void-repo-nonfree
+firefox
+firefox-i18n-pt-BR
+nautilus
+nautilus-gnome-console-extension
+nautilus-papers-extension
+nautilus-python
+gedit
+gnome-calculator
+gnome-calendar
+gnome-browser-connector
+filelight
+okular
+poppler
+libreoffice
+libreoffice-i18n-pt-BR
+mythes-pt_BR
+keepassxc
+transmission-gtk
+nicotine+
+syncthing
+syncthing-gtk
+syncthingtray
+steam
+weechat
+kitty
+gnome
+
+# --------------------------------------------------
+# CLI tools
+# --------------------------------------------------
+
+git
+github-cli
+lazygit
+lazydocker
+neovim
+helix
+tmux
+fzf
+ripgrep
+zoxide
+tree
+htop
+wget
+zip
+zstd
+hexedit
+graphviz
+bind-utils
+inetutils-telnet
+openbsd-netcat
+
+# --------------------------------------------------
+# Development
+# --------------------------------------------------
+
+go
+rust
+cargo
+ruby
+mono
+python3-pip
+clang-tools-extra
+llvm
+lldb
+gdb
+valgrind
+rpm
+docker
+docker-compose
+mariadb-client
+libmariadbclient-devel
+postgresql-client
+valkey
+dbeaver-ce
+glib-devel
+gdk-pixbuf-devel
+libwebkit2gtk41-devel
+pam-devel
+wlroots-devel
+wlroots0.18
+wlroots0.18-devel
+
+# --------------------------------------------------
+# Network / remote
+# --------------------------------------------------
+
+tailscale
+openvpn
+freerdp
+tigervnc
+cups
+hplip
+hplip-gui
+flatpak
+
+# --------------------------------------------------
+# NOT in the official repos — install manually
+# --------------------------------------------------
+# From your VUR repo (https://github.com/JoaoVictorRosmaninho/VUR), enabled by
+# install.sh when system/xbps.d/vur.conf exists:
+#   anki-bin
+# Built locally with xbps-src (void-packages, nonfree templates):
+#   cursor  dbeaver-ce  google-chrome  obsidian  onlyoffice-desktopeditors  slack-desktop
+#   (dbeaver-ce is listed above; it is skipped with a warning if not in a repo)
+#
+# Replaced by this setup (do not install): Waybar  SwayNotificationCenter  wofi  matugen-bin (official `matugen` is used)
