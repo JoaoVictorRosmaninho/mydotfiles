@@ -3,3 +3,19 @@
 .config/kitty/matugen.conf
 .config/rofi/colors.rasi
 .config/quickshell/state/
+
+# Machine-local mango overrides (monitors, ...)
+.config/mango/local.conf
+
+# Never commit secrets / credentials
+*_accessKeys.csv
+*.pem
+*.key
+.env
+.env.*
+**/.ssh/
+**/.aws/
+**/.gnupg/
+.config/gh/hosts.yml
+.config/github-copilot/
+.config/configstore/

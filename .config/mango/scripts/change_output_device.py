@@ -3,9 +3,9 @@
 import subprocess
 import json
 
-audio_devices_list_command   = 'pactl --format=json list sources'.split()
-wofi_selector_menu_command   = 'wofi -p InputSelector --dmenu'.split()
-audio_devices_change_command = 'pactl set-default-source'
+audio_devices_list_command   = 'pactl --format=json list sinks'.split()
+wofi_selector_menu_command   = 'rofi -dmenu -p OutputSelector'.split()
+audio_devices_change_command = 'pactl set-default-sink'
 
 
 def audio_devices_change_command_builder(device_id) -> list:
@@ -16,9 +16,9 @@ def select_output_device():
 
     audio_devices_str          = result.stdout.strip()
 
-    audio_devices_map          = json.loads(audio_devices_str)
+    audio_devices_map          = json.loads(audio_devices_str);
 
-    audio_devices_map          = list(filter(lambda item: "input" in item['name'] and item['properties']['media.class'] == "Audio/Source", audio_devices_map))
+    audio_devices_map          = list(filter(lambda item: "output" in item['name'] and item['properties']['media.class'] == "Audio/Sink", audio_devices_map))
 
     audio_devices              = list(map(lambda item: (item['properties']['device.description'], item['index']), audio_devices_map))
 
@@ -37,10 +37,9 @@ def select_output_device():
 
 def main():
 
-    #if wofi and pactl are installed then
-    if subprocess.run(['which', 'wofi'], capture_output=True).returncode == 0 and subprocess.run(['which', 'pactl'], capture_output=True).returncode == 0:
+    #if rofi and pactl are installed then
+    if subprocess.run(['which', 'rofi'], capture_output=True).returncode == 0 and subprocess.run(['which', 'pactl'], capture_output=True).returncode == 0:
         select_output_device()
     else:
-        print("wofi or pactl is not installed")
-
+        print("rofi or pactl is not installed")
 main()
