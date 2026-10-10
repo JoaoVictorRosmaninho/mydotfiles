@@ -67,6 +67,9 @@ Scope {
     readonly property color bgColor: Qt.alpha(Theme.bg, cfg.bgOpacity)
     readonly property color borderColor: Qt.alpha(Theme.accent, 0.14)
 
+    // Bar typeface: proportional sans with Nerd Font glyphs (icons render from the same font)
+    readonly property string barFont: "UbuntuSans Nerd Font Propo"
+
     function s(n) { return Math.round(n * cfg.scale); }
 
     readonly property int sizeCpuRam: s(12)
@@ -361,7 +364,7 @@ Scope {
                 horizontalAlignment: Text.AlignHCenter
                 text: mod.shownGlyph
                 color: mod.color
-                font.family: Theme.iconFont
+                font.family: root.barFont
                 font.pixelSize: mod.glyphSize
                 renderType: Text.NativeRendering
             }
@@ -372,7 +375,7 @@ Scope {
                 text: mod.shown
                 color: mod.color
                 horizontalAlignment: Text.AlignHCenter
-                font.family: Theme.iconFont
+                font.family: root.barFont
                 font.bold: mod.bold
                 font.pixelSize: mod.baseSize
                 renderType: Text.NativeRendering
@@ -400,7 +403,7 @@ Scope {
 
     component Lbl: Text {
         color: Theme.text
-        font.family: Theme.iconFont
+        font.family: root.barFont
         font.pixelSize: 12
     }
 
@@ -426,7 +429,7 @@ Scope {
                     anchors.centerIn: parent
                     text: opt.modelData
                     color: Theme.text
-                    font.family: Theme.iconFont
+                    font.family: root.barFont
                     font.pixelSize: 11
                 }
                 MouseArea {
@@ -451,7 +454,7 @@ Scope {
             anchors.centerIn: parent
             text: btn.label
             color: Theme.text
-            font.family: Theme.iconFont
+            font.family: root.barFont
             font.pixelSize: 10
         }
         MouseArea {
@@ -573,7 +576,7 @@ Scope {
                             anchors.centerIn: parent
                             text: dot.modelData.id
                             color: dot.modelData.focused || dot.modelData.urgent ? Theme._bgBase : Theme.textDim
-                            font.family: Theme.fontFamily
+                            font.family: root.barFont
                             font.pixelSize: s(11)
                             font.bold: true
                             function s(n) { return root.s(n) }
@@ -636,7 +639,7 @@ Scope {
                         Text {
                             text: Marquee.text
                             color: Theme.text
-                            font.family: Theme.iconFont
+                            font.family: root.barFont
                             font.pixelSize: root.sizeMarquee
                             renderType: Text.NativeRendering
                             width: Marquee.animating ? Marquee.textW
@@ -648,7 +651,7 @@ Scope {
                             visible: Marquee.animating
                             text: Marquee.text
                             color: Theme.text
-                            font.family: Theme.iconFont
+                            font.family: root.barFont
                             font.pixelSize: root.sizeMarquee
                             renderType: Text.NativeRendering
                         }
@@ -796,7 +799,7 @@ Scope {
                             Layout.fillWidth: true
                             text: "Bar settings"
                             color: Theme.text
-                            font.family: Theme.iconFont
+                            font.family: root.barFont
                             font.pixelSize: 14
                             font.bold: true
                         }
@@ -933,7 +936,7 @@ Scope {
                             anchors.centerIn: parent
                             text: "Reset to defaults"
                             color: Theme.text
-                            font.family: Theme.iconFont
+                            font.family: root.barFont
                             font.pixelSize: 11
                         }
 
@@ -1114,14 +1117,14 @@ Scope {
                                         Text {
                                             text: Qt.formatTime(calBox.now, "HH:mm")
                                             color: Theme.text
-                                            font.family: Theme.iconFont
+                                            font.family: root.barFont
                                             font.pixelSize: root.sizeCalTime
                                             font.bold: true
                                         }
                                         Text {
                                             text: Qt.formatDate(calBox.now, "dddd, d MMMM yyyy")
                                             color: Theme.textDim
-                                            font.family: Theme.iconFont
+                                            font.family: root.barFont
                                             font.pixelSize: root.sizeCalDate
                                         }
                                     }
@@ -1143,7 +1146,7 @@ Scope {
                                                 anchors.centerIn: parent
                                                 text: "\uDB80\uDD41"
                                                 color: prevMa.containsMouse ? Theme.accent : Theme.text
-                                                font.family: Theme.iconFont
+                                                font.family: root.barFont
                                                 font.pixelSize: root.sizeCalArrow
                                             }
                                             MouseArea {
@@ -1163,7 +1166,7 @@ Scope {
                                                 anchors.centerIn: parent
                                                 text: Qt.formatDate(calBox.view, "MMMM yyyy")
                                                 color: titleMa.containsMouse ? Theme.accent : Theme.text
-                                                font.family: Theme.iconFont
+                                                font.family: root.barFont
                                                 font.pixelSize: root.sizeCalMonth
                                                 font.bold: true
                                             }
@@ -1182,7 +1185,7 @@ Scope {
                                                 anchors.centerIn: parent
                                                 text: "\uDB80\uDD42"
                                                 color: nextMa.containsMouse ? Theme.accent : Theme.text
-                                                font.family: Theme.iconFont
+                                                font.family: root.barFont
                                                 font.pixelSize: root.sizeCalArrow
                                             }
                                             MouseArea {
@@ -1203,7 +1206,7 @@ Scope {
                                                 horizontalAlignment: Text.AlignHCenter
                                                 text: Qt.locale().dayName((index + calBox.firstDay) % 7, Locale.ShortFormat)
                                                 color: Theme.textDim
-                                                font.family: Theme.iconFont
+                                                font.family: root.barFont
                                                 font.pixelSize: root.sizeCalWeekday
                                             }
                                         }
@@ -1231,7 +1234,7 @@ Scope {
                                                     anchors.centerIn: parent
                                                     text: parent.modelData.n
                                                     color: parent.modelData.inMonth ? Theme.text : Theme.textFaint
-                                                    font.family: Theme.iconFont
+                                                    font.family: root.barFont
                                                     font.pixelSize: root.sizeCalDay
                                                     font.bold: parent.modelData.today
                                                 }
