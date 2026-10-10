@@ -95,7 +95,7 @@ Works on **Void Linux** (glibc, runit). One repository reproduces the whole mach
 ```bash
 # on a fresh Void install, logged in as your user (in the wheel group)
 sudo xbps-install -Sy git
-git clone https://github.com/JoaoVictorRosmaninho/mydotsfiles.git ~/dotfiles
+git clone https://github.com/JoaoVictorRosmaninho/mydotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install.sh            # or: --minimal (desktop shell only), --vur (enable the VUR repo)
 ```
