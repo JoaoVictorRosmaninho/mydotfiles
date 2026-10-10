@@ -12,6 +12,8 @@ A port of 43pr's Hyprland setup to **MangoWC** on **Void Linux** — a clean and
 
 ### **[Features](#features)  -  [Keybinds](#keybinds)  -  [Installation](#installation) -  [Updating](#updating)**
 
+### **[🧭 Trocando de máquina — passo a passo](#-trocando-de-máquina--passo-a-passo)**  -  **[Guia de manutenção](#guia-de-manutenção-port-mangowc--void)**
+
 </div>
 
 <img width="1920" height="1080" alt="v1 2 0" src="https://github.com/user-attachments/assets/3b4857bc-285a-473a-924c-be89dab714b9" />
@@ -116,6 +118,118 @@ Not automated (do it by hand on a new machine): packages built with `xbps-src` (
 > `WAYLAND_DISPLAY=wayland-0 qs -d` to bring the shell back, then unlock normally.
 
 ---
+## 🧭 Trocando de máquina — passo a passo
+
+> Escrito para ser lido daqui a meses, sem lembrar de nada. Siga na ordem.
+> Tempo estimado: ~1h (a maior parte é download de pacotes).
+
+### Visão geral em 30 segundos
+
+- **Tudo** fica neste repositório (`~/dotfiles`): configs, lista de pacotes, arquivos de sistema e serviços. O `install.sh` reproduz a máquina; o `check.sh` confirma que deu certo.
+- Os arquivos em `~/.config` são **symlinks** para `~/dotfiles/.config`. Editar um é editar o outro.
+- **Ficam de fora** do repo, de propósito: chaves SSH e GPG, credenciais da AWS, wallpapers e 7 pacotes compilados com `xbps-src`. A etapa 1 trata disso.
+- Stack: **Void Linux** (glibc, runit) + **MangoWC** (compositor) + **Quickshell** (barra, notificações, lock) + **fish/starship**, com login pelo **greetd/tuigreet**.
+
+### Etapa 1 — Na máquina ANTIGA (antes de formatar)
+
+1. **Garanta que o repo está atualizado e enviado:**
+   ```bash
+   cd ~/dotfiles && ./check.sh      # a última seção ("Repository") deve estar toda ✔
+   git status                        # nada pendente
+   git push
+   ```
+2. **Copie para um pendrive ou HD externo** o que não está no repo (é segredo ou é grande demais):
+   | O quê | Onde fica | Observação |
+   | --- | --- | --- |
+   | Chaves SSH | `~/.ssh/` | Sem elas não dá `git push` via SSH |
+   | GPG | `~/.gnupg/` | Se você assina commits ou usa `pass` |
+   | AWS | `~/.aws/` | Perfis usados pelo `awsp` e pelo prompt |
+   | Banco do KeePassXC | onde você salvou o `.kdbx` | |
+   | Wallpapers | `~/Pictures/Wallpapers/` | |
+   | Dados do Syncthing | `~/.local/state/syncthing/` | Mantém o mesmo *device ID*; senão, readicione o dispositivo nos outros aparelhos |
+   | Outros dados | `~/Documentos`, projetos etc. | O que não estiver no Syncthing ou num git remoto |
+3. **Anote os pacotes compilados com `xbps-src`.** Eles estão no final do `packages-apps.txt` (cursor, google-chrome, slack-desktop, obsidian, onlyoffice-desktopeditors, dbeaver-ce). O `void-packages` desta máquina fica em `~/voidlinux/void-packages`.
+
+### Etapa 2 — Instalar o Void
+
+1. Baixe a ISO **base glibc x86_64** em <https://voidlinux.org/download/> e grave no pendrive.
+2. Boot pelo pendrive, faça login como `root` (senha `voidlinux`) e rode `void-installer`. Esta máquina usava:
+   - **UEFI**, com partição EFI em `vfat` montada em `/boot/efi`;
+   - **btrfs** na raiz (subvolume `@`), o que permite snapshots com `snapper` / `grub-btrfs`;
+   - fonte de instalação: *Network* (já instala os pacotes atualizados);
+   - um usuário **comum** (ex.: `joao`) no grupo **`wheel`**, para ter `sudo`.
+3. Reinicie e faça login no **TTY** com o seu usuário. Ainda não existe interface gráfica.
+
+### Etapa 3 — Rodar o instalador
+
+1. **Rede:** no cabo, normalmente já funciona (`ping -c1 voidlinux.org`). No Wi-Fi, use `wpa_supplicant`/`wpa_cli` ou ative o `NetworkManager` primeiro (`sudo xbps-install -Sy NetworkManager && sudo ln -s /etc/sv/NetworkManager /var/service/ && nmtui`).
+2. **Clonar o repo.** Use HTTPS, porque as chaves SSH ainda não estão na máquina:
+   ```bash
+   sudo xbps-install -Sy git
+   git clone https://github.com/JoaoVictorRosmaninho/mydotfiles.git ~/dotfiles
+   cd ~/dotfiles
+   ```
+3. **Instalar tudo:**
+   ```bash
+   ./install.sh --vur        # --vur liga o seu repositório VUR (anki-bin); omita se não quiser
+   ```
+   - Ele vai pedir a senha do `sudo` e confirmações do `xbps` (importar chaves dos repositórios: responda `y`).
+   - Ele pode ser rodado de novo quantas vezes precisar. Se der erro de rede no meio, rode de novo.
+   - No final aparece uma lista de **Warnings**. Os pacotes "not found" são esperados (os do `xbps-src`).
+4. **Restaurar as chaves** copiadas na etapa 1 e voltar o remote para SSH:
+   ```bash
+   cp -r /caminho/do/pendrive/.ssh ~/ && chmod 700 ~/.ssh && chmod 600 ~/.ssh/id_*
+   cp -r /caminho/do/pendrive/.aws ~/        # e .gnupg, se tiver
+   git -C ~/dotfiles remote set-url origin git@github.com:JoaoVictorRosmaninho/mydotfiles.git
+   ```
+5. **Reiniciar:** `sudo reboot`. Isso aplica os grupos novos e sobe o greetd.
+
+### Etapa 4 — Primeiro login
+
+1. No **tuigreet**, aperte **`F3`** e escolha **"Mango (D-Bus)"**. Não use a "Mango" comum: sem D-Bus de sessão, o tray, as notificações e o keyring não funcionam. Ele lembra a escolha nos próximos logins.
+2. Abra um terminal (`Super+Shift+Enter`) e verifique:
+   ```bash
+   cd ~/dotfiles && ./check.sh
+   ```
+   O objetivo é **0 falhas**. Avisos (`!`) de pacotes do `xbps-src` são normais. Para qualquer `✘`, veja a tabela de problemas abaixo.
+3. Copie os wallpapers para `~/Pictures/Wallpapers/` e escolha um com **`Super+W`**. O tema (cores da barra, bordas, terminal, rofi, GTK) segue o wallpaper.
+
+### Etapa 5 — Pacotes fora dos repositórios (xbps-src)
+
+```bash
+git clone https://github.com/void-linux/void-packages.git ~/voidlinux/void-packages
+cd ~/voidlinux/void-packages
+./xbps-src binary-bootstrap
+echo XBPS_ALLOW_RESTRICTED=yes >> etc/conf      # chrome, slack etc. são "restricted"
+./xbps-src pkg google-chrome && sudo xbps-install -R hostdir/binpkgs/nonfree google-chrome
+./xbps-src pkg slack-desktop && sudo xbps-install -R hostdir/binpkgs/nonfree slack-desktop
+```
+Repita para os outros da lista no final do `packages-apps.txt`. Se algum não tiver template oficial (ex.: `cursor`), ele veio de um template próprio; procure no seu VUR (`github.com/JoaoVictorRosmaninho/VUR`).
+
+### Etapa 6 — Conferência final
+
+- [ ] `./check.sh` sem `✘`
+- [ ] Ícones no tray (rede, Syncthing) e `notify-send teste` aparece no canto
+- [ ] `Super+Esc` bloqueia, e a senha desbloqueia
+- [ ] Prompt do fish mostra o perfil da AWS e a branch do git (`awsp` troca o perfil)
+- [ ] Som (`Super+Alt+O` escolhe a saída), compartilhamento de tela numa chamada, screenshot (`Print`)
+- [ ] Syncthing sincronizando (<http://127.0.0.1:8384>)
+
+### Se algo der errado
+
+| Sintoma | Causa provável | Solução |
+| --- | --- | --- |
+| `xbps-install` falha com `unresolvable shlib libQt_6_PRIVATE_API` | Update parcial | `sudo xbps-install -Syu` e rode o `install.sh` de novo |
+| Tela preta / sem barra depois do login | Quickshell não subiu | `Ctrl+Alt+F2`, login e veja `~/.cache/quickshell.log`; ou, num terminal do mango, `qs` |
+| `check.sh`: "mango has no DBUS_SESSION_BUS_ADDRESS" | Entrou pela sessão "Mango" comum | Logout, `F3`, **"Mango (D-Bus)"** |
+| Tray vazio ou notificações não aparecem | Mesmo problema acima, ou o swaync instalado e roubando o D-Bus | Sessão certa; `sudo xbps-remove SwayNotificationCenter` |
+| Tela bloqueada e o Quickshell travou | O lock continua por segurança | `Ctrl+Alt+F2` → `export WAYLAND_DISPLAY=wayland-0; qs -d; sleep 2; qs ipc call lock lock`, volte e desbloqueie |
+| Sem rede depois do reboot | NetworkManager ativo sem conexão configurada | `nmtui` |
+| Atalho não funciona | Script ou comando ausente | `./check.sh` (seção "mango config") e `mango -p` |
+| `git push` pede usuário e senha | Remote ainda em HTTPS | Etapa 3, passo 4 |
+
+---
+
 ## Updating
 
 If you didn't move the repository/dotfiles folder then run:
@@ -228,6 +342,7 @@ Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/man
 | `greetd/config.toml` | Config do greetd (tuigreet na vt7, `--remember-session`). Vai para `/etc/greetd/config.toml`. |
 | `xbps.d/00-repository-main.conf` | Espelho do repositório principal (fastly). Vai para `/etc/xbps.d/`. |
 | `xbps.d/vur.conf` | Seu repositório **VUR** (pacotes próprios, ex.: `anki-bin`). Só é instalado com `./install.sh --vur`. |
+| `sv/syncthing/` | Serviço runit **feito à mão** (nenhum pacote fornece): roda o Syncthing como o seu usuário. `@USER@` é substituído pelo `install.sh`. Para criar outro serviço próprio, adicione uma pasta em `system/sv/<nome>/` com `run` (e `log/run`) e coloque `<nome>` em `SERVICES_APPS`. |
 
 Para mudar um arquivo de sistema: edite em `system/` e rode `./install.sh --skip-packages`. O arquivo antigo fica salvo como `<arquivo>.bak-<data>`. O `check.sh` avisa quando o sistema diverge do repo.
 

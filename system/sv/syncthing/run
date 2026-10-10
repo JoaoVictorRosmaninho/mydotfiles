@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+HOME="/home/@USER@" exec chpst -u @USER@:@USER@ syncthing --no-browser --no-restart
+

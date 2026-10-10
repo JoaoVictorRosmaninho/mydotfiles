@@ -172,6 +172,17 @@ for f in /usr/share/wayland-sessions/mango-dbus.desktop:system/wayland-sessions/
     cmp -s "$src" "$dst" && ok "$dst matches the repo" || fail "$dst differs from the repo (run ./install.sh --skip-packages)"
 done
 
+for svdir in "$REPO_DIR"/system/sv/*/; do
+    [[ -d "$svdir" ]] || continue
+    name="$(basename "$svdir")"
+    while IFS= read -r -d '' f; do
+        rel="${f#"$svdir"}"
+        sed "s/@USER@/$USER/g" "$f" | cmp -s - "/etc/sv/$name/$rel" \
+            && ok "/etc/sv/$name/$rel matches the repo" \
+            || fail "/etc/sv/$name/$rel differs from the repo (run ./install.sh --skip-packages)"
+    done < <(find "$svdir" -type f -print0)
+done
+
 MISSING_GROUPS=()
 for g in "${USER_GROUPS[@]}"; do
     getent group "$g" >/dev/null || continue

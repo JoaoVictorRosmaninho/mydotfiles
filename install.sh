@@ -224,6 +224,20 @@ section "System files"
 # mangowc package updates never overwrite it.
 install_system_file "$SYS/wayland-sessions/mango-dbus.desktop" /usr/share/wayland-sessions/mango-dbus.desktop
 
+# Hand-made runit services (not shipped by any package), e.g. syncthing running
+# as the desktop user. Templates: @USER@ is replaced with the current user.
+for svdir in "$SYS"/sv/*/; do
+    [[ -d "$svdir" ]] || continue
+    name="$(basename "$svdir")"
+    while IFS= read -r -d '' f; do
+        rel="${f#"$svdir"}"
+        tmp="$(mktemp)"
+        sed "s/@USER@/$USER/g" "$f" > "$tmp"
+        install_system_file "$tmp" "/etc/sv/$name/$rel" 755
+        rm -f "$tmp"
+    done < <(find "$svdir" -type f -print0)
+done
+
 if [[ -d /etc/greetd ]]; then
     install_system_file "$SYS/greetd/config.toml" /etc/greetd/config.toml
 else
