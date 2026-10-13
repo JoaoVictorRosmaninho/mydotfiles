@@ -37,6 +37,23 @@ Scope {
             dispatch("view," + id + ",0")
     }
 
+    // Brings an app's window to the front: switches to its tag and focuses it.
+    // Matched by desktop entry or app name against the client appid, ignoring
+    // case and punctuation ("Google Chrome" / "google-chrome", "Slack" / "slack").
+    function focusApp(desktopEntry, appName) {
+        Quickshell.execDetached({ command: ["sh", "-c", `
+            target=$(mmsg get all-clients | jq -r --arg a "$1" --arg b "$2" '
+                def norm: ascii_downcase | gsub("[^a-z0-9]"; "");
+                def hit($x; $k): ($k | norm) as $k | $k != "" and (($x | contains($k)) or ($k | contains($x)));
+                [.clients[] | (.appid // "" | norm) as $x | select($x != "" and (hit($x; $a) or hit($x; $b)))]
+                | first // empty | "\\(.id) \\(.tags[0] // 0)"')
+            [ -n "$target" ] || exit 0
+            set -- $target
+            [ "$2" -gt 0 ] && mmsg dispatch "view,$2,0"
+            mmsg dispatch "focusid,$1"
+        `, "focus-app", desktopEntry || "", appName || ""] })
+    }
+
     function nextTag() { dispatch("viewtoright_have_client") }
     function prevTag() { dispatch("viewtoleft_have_client") }
 

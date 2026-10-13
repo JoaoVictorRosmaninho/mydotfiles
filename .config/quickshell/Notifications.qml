@@ -221,7 +221,7 @@ PanelWindow {
         onLoaded: {
             try {
                 const arr = JSON.parse(text());
-                for (let i = 0; i < arr.length; i++) history.append(arr[i]);
+                for (let i = 0; i < arr.length; i++) history.append(Object.assign({ desktopEntry: "" }, arr[i]));
             } catch (e) { console.warn("Notifications: bad history file: " + e); }
             root.historyReady = true;
         }
@@ -235,10 +235,19 @@ PanelWindow {
             const out = [];
             for (let i = 0; i < history.count; i++) {
                 const e = history.get(i);
-                out.push({ summary: e.summary, body: e.body, appName: e.appName, appIcon: e.appIcon, image: e.image, time: e.time });
+                out.push({ summary: e.summary, body: e.body, appName: e.appName, desktopEntry: e.desktopEntry, appIcon: e.appIcon, image: e.image, time: e.time });
             }
             store.setText(JSON.stringify(out));
         }
+    }
+
+    // Click on a notification: invoke its "default" action (the app may open the
+    // chat/tab it refers to) and bring the app window to the front through mango,
+    // since on Wayland an app cannot always raise itself.
+    function activate(n) {
+        const def = n.actions.find(a => a.identifier === "default");
+        if (def) def.invoke();
+        Mango.focusApp(n.desktopEntry, n.appName);
     }
 
     NotificationServer {
@@ -257,6 +266,7 @@ PanelWindow {
                 summary: n.summary || "",
                 body: n.body || "",
                 appName: n.appName || "",
+                desktopEntry: n.desktopEntry || "",
                 appIcon: n.appIcon || "",
                 image: img,
                 time: Date.now()
@@ -387,6 +397,7 @@ PanelWindow {
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onClicked: mouse => {
                             if (mouse.button === Qt.RightButton) root.copyText(wrapper.modelData.summary, wrapper.modelData.body);
+                            else root.activate(wrapper.modelData);
                             wrapper.close(false);
                         }
                     }
@@ -423,11 +434,12 @@ PanelWindow {
                             Lbl { ui: root.ui; sz: 9; width: parent.width; text: wrapper.modelData.appName; color: Theme.textDim; opacity: 0.7 }
 
                             Row {
-                                visible: wrapper.modelData.actions.length > 0
+                                readonly property var buttons: wrapper.modelData.actions.filter(a => a.identifier !== "default")
+                                visible: buttons.length > 0
                                 spacing: root.px(6)
 
                                 Repeater {
-                                    model: wrapper.modelData.actions
+                                    model: parent.buttons
                                     delegate: Rectangle {
                                         required property var modelData
                                         height: root.px(20)
@@ -605,6 +617,7 @@ PanelWindow {
                     required property string summary
                     required property string body
                     required property string appName
+                    required property string desktopEntry
                     required property string appIcon
                     required property string image
                     required property real time
@@ -619,10 +632,16 @@ PanelWindow {
                     Timer { id: copiedTimer; interval: 600; onTriggered: entry.copied = false }
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            root.copyText(entry.summary, entry.body);
-                            entry.copied = true;
-                            copiedTimer.restart();
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        onClicked: mouse => {
+                            if (mouse.button === Qt.RightButton) {
+                                root.copyText(entry.summary, entry.body);
+                                entry.copied = true;
+                                copiedTimer.restart();
+                            } else {
+                                Mango.focusApp(entry.desktopEntry, entry.appName);
+                                root.panelOpen = false;
+                            }
                         }
                     }
 
