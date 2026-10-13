@@ -39,6 +39,9 @@ fail() { FAIL=$((FAIL + 1)); printf '  \033[1;31m✘\033[0m %s\n' "$1"; }
 title() { printf '\n\033[1;35m%s\033[0m\n' "$1"; }
 
 in_list() { local n="$1" g; shift; for g in "$@"; do [[ "$n" == "$g" ]] && return 0; done; return 1; }
+# Oldest live process with one of these names (zombies skipped: after a crash
+# Quickshell restarts itself as "quickshell" and leaves a defunct "qs" behind).
+live_pid() { ps -eo pid=,stat=,comm= | awk -v re="^($1)$" '$2 !~ /Z/ && $3 ~ re {print $1; exit}'; }
 bus_of() { tr '\0' '\n' < "/proc/$1/environ" 2>/dev/null | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p'; }
 
 # --------------------------------------------------
@@ -46,7 +49,7 @@ title "Session / D-Bus"
 # --------------------------------------------------
 
 MANGO_PID=$(pgrep -xo mango || true)
-QS_PID=$(pgrep -xo qs || true)
+QS_PID=$(live_pid "qs|quickshell")
 
 if [[ -z "$MANGO_PID" ]]; then
     warn "mango is not running — session checks skipped (run inside the session)"
@@ -67,8 +70,8 @@ else
         fail "$N_BUSES session buses running (expected 1) — apps are split across buses"
     fi
 
-    for p in qs nm-applet syncthingtray pipewire wireplumber; do
-        pid=$(pgrep -xo "$p" || true)
+    for p in "qs|quickshell" nm-applet syncthingtray pipewire wireplumber; do
+        pid=$(live_pid "$p")
         [[ -z "$pid" ]] && { warn "$p is not running"; continue; }
         if [[ -n "${MANGO_BUS:-}" && "$(bus_of "$pid")" == "$MANGO_BUS" ]]; then
             ok "$p is on the session bus"

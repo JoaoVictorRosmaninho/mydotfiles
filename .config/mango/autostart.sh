@@ -50,4 +50,4 @@ if command -v swayidle >/dev/null && ! pgrep -x swayidle >/dev/null; then
 fi
 
 # 7. Quickshell: bar (with system tray), notifications, OSDs, menus, lock screen
-pgrep -x qs >/dev/null || qs >"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell.log" 2>&1 &
+pgrep -x 'qs|quickshell' >/dev/null || qs >"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell.log" 2>&1 &
