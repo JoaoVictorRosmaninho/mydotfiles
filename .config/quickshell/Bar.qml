@@ -38,9 +38,11 @@ Scope {
             property bool showWall: true
             property bool showTitle: true
             property bool showTray: true
+            property bool showMic: true
+            property bool showShot: true
             property string startMods: "ws,title"
             property string centerMods: "clock"
-            property string endMods: "media,stats,tray,volume,battery,net,notif,wall,power"
+            property string endMods: "media,stats,tray,mic,volume,battery,net,notif,shot,wall,power"
         }
     }
 
@@ -55,10 +57,10 @@ Scope {
         cfg.scale = 1.0; cfg.bgOpacity = 0.85; cfg.border = true;
         cfg.showStats = false; cfg.showWs = true; cfg.showMedia = true;
         cfg.showVolume = true; cfg.showBattery = true; cfg.showNet = true;
-        cfg.showNotif = true; cfg.showWall = true; cfg.showTitle = true; cfg.showTray = true;
+        cfg.showNotif = true; cfg.showWall = true; cfg.showTitle = true; cfg.showTray = true; cfg.showMic = true; cfg.showShot = true;
         cfg.startMods = "ws,title";
         cfg.centerMods = "clock";
-        cfg.endMods = "media,stats,tray,volume,battery,net,notif,wall,power";
+        cfg.endMods = "media,stats,tray,mic,volume,battery,net,notif,shot,wall,power";
     }
 
     readonly property bool vertical: cfg.position === "left" || cfg.position === "right"
@@ -110,17 +112,19 @@ Scope {
     readonly property var batIcons: ["\uf244", "\uf243", "\uf242", "\uf241", "\uf240"]
     readonly property string batIcon: batIcons[batPct >= 90 ? 4 : batPct >= 65 ? 3 : batPct >= 40 ? 2 : batPct >= 15 ? 1 : 0]
 
-    readonly property var moduleIds: ["stats", "ws", "title", "media", "tray", "volume", "battery", "net", "notif", "wall", "power"]
+    readonly property var moduleIds: ["stats", "ws", "title", "media", "tray", "mic", "volume", "battery", "net", "notif", "shot", "wall", "power"]
     readonly property var moduleDefs: [
         { id: "stats", l: "CPU / RAM (x)", k: "showStats" },
         { id: "ws", l: "Tags", k: "showWs" },
         { id: "title", l: "Window title", k: "showTitle" },
         { id: "media", l: "Media", k: "showMedia" },
         { id: "tray", l: "System tray", k: "showTray" },
+        { id: "mic", l: "Microphone (mute all)", k: "showMic" },
         { id: "volume", l: "Volume", k: "showVolume" },
         { id: "battery", l: "Battery", k: "showBattery" },
         { id: "net", l: "Network", k: "showNet" },
         { id: "notif", l: "Notifications", k: "showNotif" },
+        { id: "shot", l: "Screenshot (flameshot)", k: "showShot" },
         { id: "wall", l: "Wallpapers", k: "showWall" },
         { id: "power", l: "Power", k: "" }
     ]
@@ -177,6 +181,8 @@ Scope {
         case "ws": return cfg.showWs;
         case "media": return cfg.showMedia && Marquee.player !== null && Marquee.title !== "";
         case "tray": return cfg.showTray && SystemTray.items.values.length > 0;
+        case "mic": return cfg.showMic && root.micSources.length > 0;
+        case "shot": return cfg.showShot;
         case "volume": return cfg.showVolume;
         case "battery": return cfg.showBattery && battery !== null;
         case "net": return cfg.showNet;
@@ -193,6 +199,8 @@ Scope {
         case "ws": return wsC;
         case "media": return mediaC;
         case "tray": return trayC;
+        case "mic": return micC;
+        case "shot": return shotC;
         case "volume": return volumeC;
         case "battery": return batteryC;
         case "net": return netC;
@@ -299,6 +307,30 @@ Scope {
     }
 
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
+
+    // Microphones: every capture device (USB headset, webcam, ...). The mute
+    // button acts on all of them at once. "In use" = some app has a capture
+    // stream open (a call, a recorder); level meters and sink monitors don't count.
+    readonly property var micSources: Pipewire.nodes.values.filter(n => n.type === PwNodeType.AudioSource)
+    readonly property var captureStreams: Pipewire.nodes.values.filter(n => n.type === PwNodeType.AudioInStream)
+    readonly property var micUsers: captureStreams.filter(n => !isMeterStream(n))
+    readonly property bool micMuted: micSources.length > 0 && micSources.every(n => n.audio && n.audio.muted)
+    readonly property bool micInUse: micUsers.length > 0
+
+    PwObjectTracker { objects: root.micSources.concat(root.captureStreams) }
+
+    function isMeterStream(n) {
+        const p = n.properties || {};
+        return p["stream.monitor"] === "true"
+            || /peak/i.test(p["media.name"] || "")
+            || p["application.id"] === "org.PulseAudio.pavucontrol";
+    }
+
+    function toggleMic() {
+        const mute = !root.micMuted;
+        for (const n of root.micSources)
+            if (n.audio) n.audio.muted = mute;
+    }
 
     Process { id: runner }
     function run(cmd) {
@@ -756,6 +788,36 @@ Scope {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // left: mute/unmute all microphones, right: pavucontrol input tab.
+    // Red while an app is capturing audio, crossed out while muted.
+    Component {
+        id: micC
+        Mod {
+            baseSize: root.sizeVolIcon
+            yOffset: root.iconYOffset
+            text: root.micMuted ? "\uDB80\uDF6D" : "\uDB80\uDF6C"
+            color: root.micMuted ? Theme.textDim : root.micInUse ? Theme.danger : Theme.text
+            onClicked: mouse => {
+                if (mouse.button === Qt.RightButton) Quickshell.execDetached(["pavucontrol", "-t", "4"]);
+                else root.toggleMic();
+            }
+        }
+    }
+
+    // left: flameshot region capture, right: full screen straight to the clipboard
+    Component {
+        id: shotC
+        Mod {
+            baseSize: root.sizeNetIcon
+            yOffset: root.iconYOffset
+            text: "\uDB83\uDE51"
+            onClicked: mouse => {
+                if (mouse.button === Qt.RightButton) Quickshell.execDetached(["flameshot", "full", "--clipboard"]);
+                else Quickshell.execDetached(["flameshot", "gui"]);
             }
         }
     }

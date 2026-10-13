@@ -308,9 +308,9 @@ Caminhos começando com `./` dentro de `source=` são relativos a `~/.config/man
 
 | Arquivo | Propósito |
 | --- | --- |
-| `shell.qml` | Ponto de entrada: instancia todos os componentes abaixo. |
+| `shell.qml` | Ponto de entrada: instancia todos os componentes abaixo. A primeira linha `//@ pragma UseQApplication` é obrigatória para os menus de clique direito do tray (mudar pragma exige reiniciar o `qs`). |
 | `Mango.qml` | **Novo.** Integração com o mango. Roda `mmsg watch all-monitors` e expõe `monitors`, `focusedMonitor`, `activeClient`, `tagsFor(monitor)`, `viewTag()` e `dispatch()`. Substitui o `Quickshell.Hyprland` do original. |
-| `Bar.qml` | Barra superior: módulos, estilos, calendar popup e painel de customização (botão direito no relógio). A fonte é definida em `barFont`, perto do topo. O módulo `tray` (componente `trayC`) mostra os ícones da bandeja via `Quickshell.Services.SystemTray`. Clique esquerdo abre o app, o direito abre o menu, o do meio faz a ação secundária. O próprio Quickshell faz o papel de *StatusNotifierWatcher*. |
+| `Bar.qml` | Barra superior: módulos, estilos, calendar popup e painel de customização (botão direito no relógio). A fonte é definida em `barFont`, perto do topo. Módulo `mic` (`micC`): clique muta/desmuta **todos** os microfones (`PwNodeType.AudioSource`); fica **vermelho** quando algum app está capturando áudio (`AudioInStream`, ignorando medidores de nível) e cortado quando mutado; botão direito abre o `pavucontrol` na aba de entrada. Módulo `shot` (`shotC`): clique abre o `flameshot gui`, botão direito captura a tela inteira para a área de transferência. O módulo `tray` (componente `trayC`) mostra os ícones da bandeja via `Quickshell.Services.SystemTray`. Clique esquerdo abre o app, o direito abre o menu, o do meio faz a ação secundária. O próprio Quickshell faz o papel de *StatusNotifierWatcher*. |
 | `Lock.qml` | **Novo.** Tela de bloqueio (substitui o hyprlock). Wallpaper desfocado, relógio, campo de senha e música tocando. Autentica via PAM em `/etc/pam.d/system-auth`. |
 | `Notifications.qml` | Servidor de notificações (substitui o swaync), popups e central de notificações. |
 | `PowerMenu.qml` | Menu de energia: bloquear, desligar, reiniciar, suspender (`loginctl`), sair (`mmsg dispatch quit`), hibernar. |
