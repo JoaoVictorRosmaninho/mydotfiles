@@ -37,7 +37,8 @@ Scope {
             dispatch("view," + id + ",0")
     }
 
-    // Brings an app's window to the front: switches to its tag and focuses it.
+    // Brings an app's window to the front: switches to its tag and focuses it,
+    // or shows it if it is a hidden named scratchpad (e.g. Slack on Super+B).
     // Matched by desktop entry or app name against the client appid, ignoring
     // case and punctuation ("Google Chrome" / "google-chrome", "Slack" / "slack").
     function focusApp(desktopEntry, appName) {
@@ -46,9 +47,15 @@ Scope {
                 def norm: ascii_downcase | gsub("[^a-z0-9]"; "");
                 def hit($x; $k): ($k | norm) as $k | $k != "" and (($x | contains($k)) or ($k | contains($x)));
                 [.clients[] | (.appid // "" | norm) as $x | select($x != "" and (hit($x; $a) or hit($x; $b)))]
-                | first // empty | "\\(.id) \\(.tags[0] // 0)"')
+                | first // empty
+                | "\(.id) \(.tags[0] // 0) \(.is_namedscratchpad) \(.is_visible) \(.appid)"')
             [ -n "$target" ] || exit 0
             set -- $target
+            if [ "$3" = true ]; then
+                [ "$4" = true ] || mmsg dispatch "toggle_named_scratchpad,$5,none"
+                mmsg dispatch "focusid,$1"
+                exit 0
+            fi
             [ "$2" -gt 0 ] && mmsg dispatch "view,$2,0"
             mmsg dispatch "focusid,$1"
         `, "focus-app", desktopEntry || "", appName || ""] })

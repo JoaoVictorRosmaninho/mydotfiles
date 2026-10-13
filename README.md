@@ -61,6 +61,10 @@ Just made some tweaks to it. Give it some love: [hyprquickpaper](https://github.
 | `Super + Space` | Toggle floating |
 | `Super + 1..9` | View tag (pressing the current one goes back to the previous tag) |
 | `Super + Tab` | Flip between the last two tags |
+| `Super + Ctrl + N` | Go to the first empty tag (task tags 6–9 first; `+ Shift` takes the window) |
+| `Super + ;` | Jump labels: press the letter shown over a window to focus it |
+| `Super + U` / `Super + B` | Scratchpad terminal / Slack (show and hide over any tag) |
+| `Super + Alt + R` | Resize mode: arrows (`Shift` = bigger steps), `Esc` or `Enter` leaves |
 | `Super + Shift + 1..9` | Move window to tag |
 | `Super + Ctrl + ← →` | Previous / next tag (`+ Shift`: take the window along) |
 | `Super + N` / `Super + Shift + N` | Throw window to next / previous tag |
@@ -83,6 +87,24 @@ Just made some tweaks to it. Give it some love: [hyprquickpaper](https://github.
 > [!note]
 >
 > **Move and resize windows with Super + left/right mouse drag.**
+
+### Workflow
+
+Each tag has a fixed purpose, so `Super+<n>` always lands in the same place; quick lookups live in scratchpads instead of taking a tag.
+
+| Tag | Purpose | Layout |
+| --- | --- | --- |
+| 1 | Browser (Chrome opens here) | monocle |
+| 2 | Code (VS Code opens here) | center_tile |
+| 3 | Chat / e-mail | center_tile |
+| 4 | Terminals | scroller |
+| 5 | Notes / docs | tile |
+| 6–9 | Tasks and prototypes | scroller |
+
+- **New task:** `Super+Ctrl+N` goes to a free task tag; open editor + terminal + browser there, they become scroller columns (`Super+Shift+X` cycles 1/3 · 1/2 · 2/3 · full). `Super+Tab` flips between the task and the previous tag.
+- **Quick look:** `Super+B` shows Slack over the current tag, `Super+U` a terminal; the same key hides them. Clicking a Slack notification shows the scratchpad.
+- **Many windows:** `Super+;` shows a letter over each window; `Super+Shift+G` keeps a reference window (doc, log, video) on every tag.
+- Chrome and VS Code windows always open on tags 1 and 2 (`rules.conf`); to use one in a task tag, move it with `Super+Shift+<n>`.
 
 ### What changed from the Hyprland version
 
@@ -431,4 +453,6 @@ git add -A && git commit -m "..." && git push
 - **`qs ipc call <alvo> show` não chama a função `show`:** a CLI interpreta `show` como o subcomando de listar funções. Use `toggle`, ou funções como `sound` e `network`.
 - **Void não aceita update parcial:** se um `xbps-install` falhar com `unresolvable shlib libQt_6_PRIVATE_API`, rode antes `sudo xbps-install -Su`.
 - **Lock screen e travamentos:** se o Quickshell cair com a tela bloqueada, o mango mantém a sessão bloqueada. A recuperação via TTY está descrita na seção Installation.
+- **Hot reload pode derrubar o Quickshell:** com `//@ pragma UseQApplication` (necessário para os menus do tray), um recarregamento automático depois de editar um `.qml` às vezes causa um crash. Ele reinicia sozinho (`Quickshell has been restarted` no log); se algo ficar estranho, `qs kill; setsid qs &`.
+- **`view_current_to_back`:** pedir a tag em que você já está leva à anterior. Em scripts, só chame `view,<n>` se `<n>` for diferente da tag atual.
 - **Pastas de imagem:** wallpapers e screenshots usam `~/Pictures`, não `~/Imagens`. Para mudar, edite `hyprquickpaper/config.json` e os binds de `Print` em `binds.conf`.

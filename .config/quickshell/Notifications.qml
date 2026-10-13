@@ -396,9 +396,12 @@ PanelWindow {
                         hoverEnabled: true
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onClicked: mouse => {
-                            if (mouse.button === Qt.RightButton) root.copyText(wrapper.modelData.summary, wrapper.modelData.body);
-                            else root.activate(wrapper.modelData);
+                            // Close first: invoking the action can make the app close the
+                            // notification right away, destroying this popup.
+                            const n = wrapper.modelData;
+                            if (mouse.button === Qt.RightButton) root.copyText(n.summary, n.body);
                             wrapper.close(false);
+                            if (mouse.button !== Qt.RightButton) root.activate(n);
                         }
                     }
 
