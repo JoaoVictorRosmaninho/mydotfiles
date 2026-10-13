@@ -12,7 +12,7 @@ A port of 43pr's Hyprland setup to **MangoWC** on **Void Linux** — a clean and
 
 ### **[Features](#features)  -  [Keybinds](#keybinds)  -  [Installation](#installation) -  [Updating](#updating)**
 
-### **[🧭 Trocando de máquina — passo a passo](#-trocando-de-máquina--passo-a-passo)**  -  **[Guia de manutenção](#guia-de-manutenção-port-mangowc--void)**
+### **[⌨️ Guia de atalhos e workflow](docs/ATALHOS.md)**  -  **[🧭 Trocando de máquina — passo a passo](#-trocando-de-máquina--passo-a-passo)**  -  **[Guia de manutenção](#guia-de-manutenção-port-mangowc--void)**
 
 </div>
 
@@ -45,7 +45,7 @@ Just made some tweaks to it. Give it some love: [hyprquickpaper](https://github.
 ## Keybinds
 
 > Window management lives on **Super**; **Alt is left free for applications** (Alt+arrows = back/forward in browsers, move line in VS Code...).
-> All keybinds: [.config/mango/binds.conf](.config/mango/binds.conf)
+> **Full guide with descriptions and workflow examples: [docs/ATALHOS.md](docs/ATALHOS.md)** · source: [.config/mango/binds.conf](.config/mango/binds.conf)
 
 | Keybind | Action |
 | --- | --- |
