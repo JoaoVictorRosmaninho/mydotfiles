@@ -59,7 +59,8 @@ Just made some tweaks to it. Give it some love: [hyprquickpaper](https://github.
 | `Super + Enter` | Swap focused window with the master |
 | `Super + F` / `Super + Shift + M` | Fullscreen / maximize |
 | `Super + Space` | Toggle floating |
-| `Super + 1..9` | View tag |
+| `Super + 1..9` | View tag (pressing the current one goes back to the previous tag) |
+| `Super + Tab` | Flip between the last two tags |
 | `Super + Shift + 1..9` | Move window to tag |
 | `Super + Ctrl + ← →` | Previous / next tag (`+ Shift`: take the window along) |
 | `Super + N` / `Super + Shift + N` | Throw window to next / previous tag |
