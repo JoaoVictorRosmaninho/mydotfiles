@@ -29,8 +29,8 @@ fi
 eval "$LISTS"
 eval "$(grep -E '^LOGIN_SHELL=' "$REPO_DIR/install.sh")"
 
-# mango -p errors that already existed in the original config (see README).
-KNOWN_MANGO_ERRORS="ov_tab_mode|disable_while_typing|left_handed|middle_button_emulation"
+# mango -p errors to tolerate (none: the config is clean). Regex, e.g. "foo|bar".
+KNOWN_MANGO_ERRORS="^$"
 
 PASS=0; WARN=0; FAIL=0
 ok()   { PASS=$((PASS + 1)); printf '  \033[1;32m✔\033[0m %s\n' "$1"; }
@@ -97,7 +97,7 @@ fi
 title "mango config"
 # --------------------------------------------------
 
-MANGO_OUT=$(mango -p 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+MANGO_OUT=$(mango -c "$CONFIG_DIR/mango/config.conf" -p 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
 NEW_ERRORS=$(printf '%s\n' "$MANGO_OUT" | grep '\[ERROR\]' | grep -vE "$KNOWN_MANGO_ERRORS" || true)
 if [[ -z "$NEW_ERRORS" ]]; then
     ok "mango -p: no new errors"

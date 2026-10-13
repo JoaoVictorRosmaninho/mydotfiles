@@ -44,30 +44,40 @@ Just made some tweaks to it. Give it some love: [hyprquickpaper](https://github.
 
 ## Keybinds
 
-> Your existing mango binds are kept; these are the ones added for the shell.
+> Window management lives on **Super**; **Alt is left free for applications** (Alt+arrows = back/forward in browsers, move line in VS Code...).
 > All keybinds: [.config/mango/binds.conf](.config/mango/binds.conf)
 
-| Keybind                 | Action                    |
-| -----------             | ------------------------- |
-| `Super + Shift + Enter` | Terminal (Alacritty)      |
-| `Super + P`             | Application launcher (Rofi) |
-| `Super + V`             | Clipboard history         |
-| `Super + Q`             | Close active window       |
-| `Super + E`             | File manager              |
-| `Super + 1..9`          | View tag                  |
-| `Alt + 1..9`            | Move window to tag        |
-| `Super + A`             | Settings menu             |
-| `Super + Grave`         | Power menu                |
-| `Super + X`             | Notifications             |
-| `Super + D`             | Notes / To-do             |
-| `Super + Z`             | Wheel launcher            |
-| `Super + W`             | Wallpaper selector        |
-| `Super + Shift + W`     | Toggle bar                |
-| `Super + Escape`        | Lock screen               |
-| `Super + Shift + O`     | Switch opacity            |
-| `Super + Shift + L`     | Light/dark toggle         |
-| `Print`                 | Screenshot fullscreen     |
-| `Shift + Print`         | Screenshot area select    |
+| Keybind | Action |
+| --- | --- |
+| `Super + Shift + Enter` | Terminal (Alacritty) |
+| `Super + P` / `Super + V` | App launcher / clipboard history (Rofi) |
+| `Super + E` | File manager (Nautilus) |
+| `Super + Q` | Close window |
+| `Super + ←↑→↓` | Focus window in that direction |
+| `Super + Shift + ←↑→↓` | Swap window in that direction |
+| `Super + Alt + ←↑→↓` | Resize window |
+| `Super + Enter` | Swap focused window with the master |
+| `Super + F` / `Super + Shift + M` | Fullscreen / maximize |
+| `Super + Space` | Toggle floating |
+| `Super + 1..9` | View tag |
+| `Super + Shift + 1..9` | Move window to tag |
+| `Super + Ctrl + ← →` | Previous / next tag (`+ Shift`: take the window along) |
+| `Super + N` / `Super + Shift + N` | Throw window to next / previous tag |
+| `Super + T / M / G / S` | Layout: tile / monocle / grid / scroller (`Super + C` cycles) |
+| `Alt + Tab` | Overview of all windows |
+| `Super + Shift + Z` | Scratchpad |
+| `Super + A` | Settings menu |
+| `Super + Grave` | Power menu |
+| `Super + X` | Notifications |
+| `Super + D` | Notes / To-do |
+| `Super + Z` | Wheel launcher |
+| `Super + W` / `Super + Shift + W` | Wallpaper selector / toggle bar |
+| `Super + Escape` | Lock screen (also automatic after 10 min idle) |
+| `Super + Shift + O` / `Super + Shift + L` | Opacity / light-dark toggle |
+| `Super + L` | Screenshot with flameshot (select + annotate) |
+| `Print` / `Shift + Print` | Screenshot fullscreen / area (saved to ~/Pictures and copied) |
+| `Super + Alt + O` / `Super + Alt + I` | Pick audio output / input device |
+| `Mic mute key` | Mute / unmute every microphone |
 
 > [!note]
 >
@@ -225,7 +235,7 @@ Repita para os outros da lista no final do `packages-apps.txt`. Se algum não ti
 | Tray vazio ou notificações não aparecem | Mesmo problema acima, ou o swaync instalado e roubando o D-Bus | Sessão certa; `sudo xbps-remove SwayNotificationCenter` |
 | Tela bloqueada e o Quickshell travou | O lock continua por segurança | `Ctrl+Alt+F2` → `export WAYLAND_DISPLAY=wayland-0; qs -d; sleep 2; qs ipc call lock lock`, volte e desbloqueie |
 | Sem rede depois do reboot | NetworkManager ativo sem conexão configurada | `nmtui` |
-| Atalho não funciona | Script ou comando ausente | `./check.sh` (seção "mango config") e `mango -p` |
+| Atalho não funciona | Script ou comando ausente | `./check.sh` (seção "mango config") e `mango -c ~/.config/mango/config.conf -p` |
 | `git push` pede usuário e senha | Remote ainda em HTTPS | Etapa 3, passo 4 |
 
 ---
@@ -360,7 +370,7 @@ Para mudar um arquivo de sistema: edite em `system/` e rode `./install.sh --skip
 | `.config/swappy/config` | Editor de screenshot. |
 | `.config/xdg-desktop-portal/mango-portals.conf` | Portais para `XDG_CURRENT_DESKTOP=mango`: `wlr` para compartilhar tela, `gtk` para seletor de arquivos. |
 | `install.sh` | Reproduz a máquina (veja Installation). `--minimal`, `--skip-packages`, `--vur`. Idempotente. |
-| `check.sh` | **Verificação somente leitura**: D-Bus único, notificações, tray, `mango -p`, arquivos e comandos usados nos binds, symlinks, pacotes, serviços, arquivos de sistema, grupos, shell e se o repo está commitado e enviado. O código de saída é o número de falhas. Rode dentro da sessão gráfica. |
+| `check.sh` | **Verificação somente leitura**: D-Bus único, notificações, tray, `mango -c ~/.config/mango/config.conf -p`, arquivos e comandos usados nos binds, symlinks, pacotes, serviços, arquivos de sistema, grupos, shell e se o repo está commitado e enviado. O código de saída é o número de falhas. Rode dentro da sessão gráfica. |
 | `update.sh` | Após um `git pull`: instala pacotes novos (dos dois arquivos), linka arquivos novos e regenera o tema. `--dry-run`, `--skip-packages`, `--skip-theme`, `--restart-shell`. |
 | `packages.txt` | Pacotes do **shell** (mango, quickshell, portais, áudio, fontes...). |
 | `packages-apps.txt` | Seus **programas** (sistema base, apps, CLI, desenvolvimento, GPU AMD...). No final estão os que não existem nos repositórios oficiais e precisam ser compilados com `xbps-src`. Ao instalar algo novo que deve fazer parte da máquina, adicione aqui. |
@@ -395,7 +405,7 @@ git add -A && git commit -m "..." && git push
 
 ### Tarefas comuns
 
-- **Mudar ou adicionar um atalho:** edite `~/.config/mango/binds.conf`. Formato: `bind=MODS,tecla,função,argumento`. Use `spawn` para comandos simples (o `~` é expandido) e `spawn_shell` para comandos com pipe, `&&` ou `$(...)`. Valide com `mango -p` e aplique com `Super+R` (ou `mmsg dispatch reload_config`).
+- **Mudar ou adicionar um atalho:** edite `~/.config/mango/binds.conf`. Formato: `bind=MODS,tecla,função,argumento`. Use `spawn` para comandos simples (o `~` é expandido) e `spawn_shell` para comandos com pipe, `&&` ou `$(...)`. Valide com `mango -c ~/.config/mango/config.conf -p` e aplique com `Super+R` (ou `mmsg dispatch reload_config`).
 - **Configurar monitores de forma fixa:** crie `~/.config/mango/local.conf`, ou use Settings → Display, que salva em `~/.config/quickshell/state/display.sh` e é reaplicado no login.
 - **Trocar a fonte da barra:** em `Bar.qml`, mude `readonly property string barFont`. Para ver as Nerd Fonts instaladas: `fc-list : family | grep -i "nerd font"`.
 - **Tamanho e altura da barra:** botão direito no relógio abre o painel de customização (posição, estilo, espessura, escala, módulos). Os padrões ficam no `JsonAdapter` no topo de `Bar.qml`.
@@ -408,7 +418,7 @@ git add -A && git commit -m "..." && git push
 - **Log do Quickshell:** `qs log` (instância atual) ou `~/.cache/quickshell.log`.
 - **Reiniciar o shell:** `qs kill; setsid qs >~/.cache/quickshell.log 2>&1 &`.
 - **Testar o QML direto do repo:** `qs -p ~/dotfiles/.config/quickshell`.
-- **Validar a config do mango:** `mango -p`. Os erros `ov_tab_mode`, `disable_while_typing`, `left_handed` e `middle_button_emulation`, e os conflitos de `Super+N` / `Alt+Shift+Setas`, já existiam antes da migração.
+- **Validar a config do mango:** `mango -c ~/.config/mango/config.conf -p` (o `-c` precisa vir **antes** do `-p`; na ordem inversa ele valida a config padrão e sempre diz que está tudo certo). A config atual não tem nenhum erro nem conflito de atalho.
 - **D-Bus da sessão:** `pgrep -a dbus-daemon | grep -c -- --session` deve dar **1** (fora o do at-spi, que tem `--config-file`). Se der mais, você entrou pela sessão "Mango" comum em vez de "Mango (D-Bus)". Também dá para comparar o barramento de dois processos com `tr '\0' '\n' < /proc/$(pgrep -xo qs)/environ | grep DBUS`.
 - **Ícone faltando no tray:** o app precisa suportar StatusNotifierItem (AppIndicator). O `nm-applet` precisa do `--indicator`. Apps que só implementam o tray antigo do X11 (XEmbed) não aparecem.
 - **Quem é o servidor de notificações:** `dbus-send --session --print-reply --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.GetServerInformation`. Deve responder "quickshell".

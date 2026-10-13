@@ -326,6 +326,13 @@ Scope {
             || p["application.id"] === "org.PulseAudio.pavucontrol";
     }
 
+    IpcHandler {
+        target: "mic"
+        function toggle(): void { root.toggleMic(); }
+        function isMuted(): bool { return root.micMuted; }
+        function isInUse(): bool { return root.micInUse; }
+    }
+
     function toggleMic() {
         const mute = !root.micMuted;
         for (const n of root.micSources)

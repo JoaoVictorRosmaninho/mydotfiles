@@ -38,5 +38,16 @@ pgrep -f '^/usr/libexec/xdg-desktop-portal$' >/dev/null || /usr/libexec/xdg-desk
 # 5. Wallpaper daemon (restores the last wallpaper by itself)
 pgrep -x awww-daemon >/dev/null || awww-daemon &
 
-# 6. Quickshell: bar (with system tray), notifications, OSDs, menus, lock screen
+# 6. Idle: lock after 10 min, screen off after 15 min (back on with any input),
+#    and always lock before suspending. Apps holding an idle inhibitor (video,
+#    calls) postpone it. sleep_monitor keeps the window layout intact.
+if command -v swayidle >/dev/null && ! pgrep -x swayidle >/dev/null; then
+    swayidle -w \
+        timeout 600 'qs ipc call lock lock' \
+        timeout 900 'mmsg dispatch "sleep_monitor,.*"' \
+            resume 'mmsg dispatch "wakeup_monitor,.*"' \
+        before-sleep 'qs ipc call lock lock' &
+fi
+
+# 7. Quickshell: bar (with system tray), notifications, OSDs, menus, lock screen
 pgrep -x qs >/dev/null || qs >"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell.log" 2>&1 &
