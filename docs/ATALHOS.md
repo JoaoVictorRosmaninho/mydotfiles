@@ -122,7 +122,7 @@ Notação: `Super+Shift+N` = segurar Super e Shift e apertar N. `←↑→↓` =
 | `Super+R` | Recarrega a configuração do mango |
 | `Super+Shift+Q` | Sai da sessão |
 
-> Inatividade: a tela **bloqueia sozinha aos 10 min** e **apaga aos 15 min** (volta com qualquer tecla). Apps que pedem para manter a tela ligada (vídeo, chamadas) adiam isso. Ela também bloqueia antes de suspender.
+> Inatividade: a tela **bloqueia sozinha aos 10 min** e **apaga aos 15 min** (volta com qualquer tecla). Isso **não acontece** enquanto a janela em foco estiver em **tela cheia** ou for um **jogo do Steam** (mesmo em janela, mesmo jogando só com controle), nem enquanto um app pedir para manter a tela ligada (vídeo, chamadas). Ela também bloqueia antes de suspender.
 
 ### Screenshots
 
